@@ -15,11 +15,14 @@ pub struct Stats {
     pub block_height: FetchStatus<u64>,
     pub last_block_time: u64,
     pub average_block_time: u64,
-    pub chain_size: u64,
-    pub total_transactions_count: u64,
     pub seconds_since_last_block: FetchStatus<u64>,
     pub transactions_count_over_last_30_days: FetchStatus<u64>,
     pub average_block_time_for_last_2016_blocks: FetchStatus<u64>,
+    pub chain_size: FetchStatus<u64>,
+    pub utxo_set_size: FetchStatus<u64>,
+    pub total_transactions_count: FetchStatus<u64>,
+    pub tps_for_last_30_days: FetchStatus<f64>,
+    pub total_fees_for_last_24_hours: FetchStatus<u64>,
 }
 
 #[derive(Clone)]
@@ -45,11 +48,14 @@ impl AppState {
         let block_height = FetchStatus::NotStarted;
         let last_block_time = 38999993832;
         let average_block_time = 9600;
-        let chain_size = 1890922;
-        let total_transactions_count = 1000000000;
         let seconds_since_last_block = FetchStatus::NotStarted;
         let transactions_count_over_last_30_days = FetchStatus::NotStarted;
         let average_block_time_for_last_2016_blocks = FetchStatus::NotStarted;
+        let chain_size = FetchStatus::NotStarted;
+        let utxo_set_size = FetchStatus::NotStarted;
+        let total_transactions_count = FetchStatus::NotStarted;
+        let tps_for_last_30_days = FetchStatus::NotStarted;
+        let total_fees_for_last_24_hours = FetchStatus::NotStarted;
         Self::Initialized(InitializedData {
             duration,
             counter_sleep,
@@ -59,10 +65,13 @@ impl AppState {
                 last_block_time,
                 average_block_time,
                 chain_size,
-                total_transactions_count,
                 seconds_since_last_block,
                 transactions_count_over_last_30_days,
                 average_block_time_for_last_2016_blocks,
+                utxo_set_size,
+                total_transactions_count,
+                tps_for_last_30_days,
+                total_fees_for_last_24_hours,
             },
             newest_block_found_height: None,
         })
@@ -100,6 +109,11 @@ impl AppState {
                     seconds_since_last_block,
                     transactions_count_over_last_30_days,
                     average_block_time_for_last_2016_blocks,
+                    chain_size,
+                    utxo_set_size,
+                    total_transactions_count,
+                    tps_for_last_30_days,
+                    total_fees_for_last_24_hours,
                     ..
                 },
             ..
@@ -162,6 +176,76 @@ impl AppState {
                     FetchEvent::Complete(new_average_block_time_for_last_2016_blocks) => {
                         *average_block_time_for_last_2016_blocks =
                             FetchStatus::Complete(new_average_block_time_for_last_2016_blocks);
+                    }
+                },
+                Resource::ChainSize(event) => match event {
+                    FetchEvent::Start => {
+                        *chain_size = FetchStatus::InProgress(match chain_size {
+                            FetchStatus::Complete(old_value) => Some(*old_value),
+                            FetchStatus::NotStarted => None,
+                            FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                    // InProgress
+                        })
+                    }
+                    FetchEvent::Complete(new_chain_size) => {
+                        *chain_size = FetchStatus::Complete(new_chain_size);
+                    }
+                },
+                Resource::UtxoSetSize(event) => match event {
+                    FetchEvent::Start => {
+                        *utxo_set_size = FetchStatus::InProgress(match utxo_set_size {
+                            FetchStatus::Complete(old_value) => Some(*old_value),
+                            FetchStatus::NotStarted => None,
+                            FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                    // InProgress
+                        })
+                    }
+                    FetchEvent::Complete(new_utxo_set_size) => {
+                        *utxo_set_size = FetchStatus::Complete(new_utxo_set_size);
+                    }
+                },
+                Resource::TotalTransactionCount(event) => match event {
+                    FetchEvent::Start => {
+                        *total_transactions_count =
+                            FetchStatus::InProgress(match total_transactions_count {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_total_transactions_count) => {
+                        *total_transactions_count =
+                            FetchStatus::Complete(new_total_transactions_count);
+                    }
+                },
+                Resource::TpsForLast30Days(event) => match event {
+                    FetchEvent::Start => {
+                        *tps_for_last_30_days =
+                            FetchStatus::InProgress(match tps_for_last_30_days {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_tps_for_last_30_days) => {
+                        *tps_for_last_30_days = FetchStatus::Complete(new_tps_for_last_30_days);
+                    }
+                },
+                Resource::TotalFeesForLast24Hours(event) => match event {
+                    FetchEvent::Start => {
+                        *total_fees_for_last_24_hours =
+                            FetchStatus::InProgress(match total_fees_for_last_24_hours {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_total_fees_for_last_24_hours) => {
+                        *total_fees_for_last_24_hours =
+                            FetchStatus::Complete(new_total_fees_for_last_24_hours);
                     }
                 },
                 //TransactionsCountOverLast30Days(FetchEvent<u64>),

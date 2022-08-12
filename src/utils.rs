@@ -63,8 +63,16 @@ pub fn format_number(num: u64) -> String {
     let num_string = format!("{}", num);
     format_number_string(num_string)
 }
+pub fn format_float_number(num: f64) -> String {
+    let num_string = format!("{}", num);
+    format_number_string(num_string)
+}
 
 pub fn round(x: f64, decimals: u32) -> f64 {
     let y = 10i64.pow(decimals) as f64;
     (x * y).round() / y
+}
+
+pub fn convert_satoshis_to_btc(sats: u64) -> f64 {
+    sats as f64 / 100_000_000.0
 }

@@ -114,6 +114,94 @@ fn start_loop_for_fetching_average_block_time_for_last_2016_blocks(events: &Even
     });
 }
 
+fn start_loop_for_fetching_chain_size(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::ChainSize(
+                FetchEvent::Start,
+            )));
+        let chain_size = bitcoin_node_query::get_chain_size(&c);
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::ChainSize(
+                FetchEvent::Complete(chain_size),
+            )));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_utxo_set_size(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::UtxoSetSize(
+                FetchEvent::Start,
+            )));
+        let utxo_set_size = bitcoin_node_query::get_utxo_set_size(&c);
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::UtxoSetSize(
+                FetchEvent::Complete(utxo_set_size),
+            )));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_total_transaction_count(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::TotalTransactionCount(
+                FetchEvent::Start,
+            )));
+        let total_transactions_count = bitcoin_node_query::get_total_transactions_count(&c);
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::TotalTransactionCount(
+                FetchEvent::Complete(total_transactions_count),
+            )));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+
+fn start_loop_for_fetching_tps_for_last_30_days(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::TpsForLast30Days(
+                FetchEvent::Start,
+            )));
+        let tps_for_last_30_days = bitcoin_node_query::get_tps_for_last_30_days(&c);
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::TpsForLast30Days(
+                FetchEvent::Complete(tps_for_last_30_days),
+            )));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_total_fees_for_last_24_hours(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::TotalFeesForLast24Hours(FetchEvent::Start),
+        ));
+        let total_fees_for_last_24_hours = bitcoin_node_query::get_total_fee_for_24_hours(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::TotalFeesForLast24Hours(FetchEvent::Complete(total_fees_for_last_24_hours)),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+
 pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     // Configure Crossterm backend for tui
     let stdout = stdout();
@@ -131,6 +219,12 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     start_loop_for_fetching_transactions_count_over_last_30_days(&events);
     start_loop_for_fetching_new_block_height(&events);
     start_loop_for_fetching_average_block_time_for_last_2016_blocks(&events);
+    start_loop_for_fetching_chain_size(&events);
+    // TODO: this is erroring out
+    //start_loop_for_fetching_utxo_set_size(&events);
+    start_loop_for_fetching_total_transaction_count(&events);
+    start_loop_for_fetching_tps_for_last_30_days(&events);
+    start_loop_for_fetching_total_fees_for_last_24_hours(&events);
 
     loop {
         let mut app = app.borrow_mut();

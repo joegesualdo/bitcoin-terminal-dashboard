@@ -1,5 +1,4 @@
 use self::key::Key;
-use crate::app::state::FetchStatus;
 
 pub mod events;
 pub mod key;
@@ -13,6 +12,11 @@ pub enum Resource {
     SecondsSinceLastBlock(FetchEvent<u64>),
     TransactionsCountOverLast30Days(FetchEvent<u64>),
     AverageBlockTimeForLast2016Blocks(FetchEvent<u64>),
+    ChainSize(FetchEvent<u64>),
+    UtxoSetSize(FetchEvent<u64>),
+    TotalTransactionCount(FetchEvent<u64>),
+    TpsForLast30Days(FetchEvent<f64>),
+    TotalFeesForLast24Hours(FetchEvent<u64>),
 }
 
 pub enum InputEvent {
