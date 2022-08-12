@@ -23,6 +23,9 @@ pub struct Stats {
     pub total_transactions_count: FetchStatus<u64>,
     pub tps_for_last_30_days: FetchStatus<f64>,
     pub total_fees_for_last_24_hours: FetchStatus<u64>,
+    pub difficulty: FetchStatus<f64>,
+    pub current_difficulty_epoch: FetchStatus<u64>,
+    pub block_count_until_retarget: FetchStatus<f64>,
 }
 
 #[derive(Clone)]
@@ -56,6 +59,9 @@ impl AppState {
         let total_transactions_count = FetchStatus::NotStarted;
         let tps_for_last_30_days = FetchStatus::NotStarted;
         let total_fees_for_last_24_hours = FetchStatus::NotStarted;
+        let difficulty = FetchStatus::NotStarted;
+        let current_difficulty_epoch = FetchStatus::NotStarted;
+        let block_count_until_retarget = FetchStatus::NotStarted;
         Self::Initialized(InitializedData {
             duration,
             counter_sleep,
@@ -72,6 +78,9 @@ impl AppState {
                 total_transactions_count,
                 tps_for_last_30_days,
                 total_fees_for_last_24_hours,
+                difficulty,
+                current_difficulty_epoch,
+                block_count_until_retarget,
             },
             newest_block_found_height: None,
         })
@@ -101,6 +110,46 @@ impl AppState {
             *newest_block_found_height = Some(block_height);
         }
     }
+
+    pub fn count_sleep(&self) -> Option<u32> {
+        if let Self::Initialized(InitializedData { counter_sleep, .. }) = self {
+            Some(*counter_sleep)
+        } else {
+            None
+        }
+    }
+
+    pub fn count_tick(&self) -> Option<u64> {
+        if let Self::Initialized(InitializedData { counter_tick, .. }) = self {
+            Some(*counter_tick)
+        } else {
+            None
+        }
+    }
+
+    pub fn duration(&self) -> Option<&Duration> {
+        if let Self::Initialized(InitializedData { duration, .. }) = self {
+            Some(duration)
+        } else {
+            None
+        }
+    }
+
+    pub fn increment_delay(&mut self) {
+        if let Self::Initialized(InitializedData { duration, .. }) = self {
+            // Set the duration, note that the duration is in 1s..10s
+            let secs = (duration.as_secs() + 1).clamp(1, 10);
+            *duration = Duration::from_secs(secs);
+        }
+    }
+
+    pub fn decrement_delay(&mut self) {
+        if let Self::Initialized(InitializedData { duration, .. }) = self {
+            // Set the duration, note that the duration is in 1s..10s
+            let secs = (duration.as_secs() - 1).clamp(1, 10);
+            *duration = Duration::from_secs(secs);
+        }
+    }
     pub fn handle_fetch_resource(&mut self, resource: Resource) {
         if let Self::Initialized(InitializedData {
             stats:
@@ -114,6 +163,9 @@ impl AppState {
                     total_transactions_count,
                     tps_for_last_30_days,
                     total_fees_for_last_24_hours,
+                    difficulty,
+                    current_difficulty_epoch,
+                    block_count_until_retarget,
                     ..
                 },
             ..
@@ -248,49 +300,52 @@ impl AppState {
                             FetchStatus::Complete(new_total_fees_for_last_24_hours);
                     }
                 },
+                Resource::Difficulty(event) => match event {
+                    FetchEvent::Start => {
+                        *difficulty = FetchStatus::InProgress(match difficulty {
+                            FetchStatus::Complete(old_value) => Some(*old_value),
+                            FetchStatus::NotStarted => None,
+                            FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                    // InProgress
+                        })
+                    }
+                    FetchEvent::Complete(new_difficulty) => {
+                        *difficulty = FetchStatus::Complete(new_difficulty);
+                    }
+                },
+                Resource::CurrentDifficultyEpoch(event) => match event {
+                    FetchEvent::Start => {
+                        *current_difficulty_epoch =
+                            FetchStatus::InProgress(match current_difficulty_epoch {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_current_difficulty_epoch) => {
+                        *current_difficulty_epoch =
+                            FetchStatus::Complete(new_current_difficulty_epoch);
+                    }
+                },
+                Resource::BlockCountUntilRetarget(event) => match event {
+                    FetchEvent::Start => {
+                        *block_count_until_retarget =
+                            FetchStatus::InProgress(match block_count_until_retarget {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_block_count_until_retarget) => {
+                        *block_count_until_retarget =
+                            FetchStatus::Complete(new_block_count_until_retarget);
+                    }
+                },
                 //TransactionsCountOverLast30Days(FetchEvent<u64>),
                 //AverageBlockTimeForLast2016Blocks(FetchEvent<u64>),
             }
-        }
-    }
-
-    pub fn count_sleep(&self) -> Option<u32> {
-        if let Self::Initialized(InitializedData { counter_sleep, .. }) = self {
-            Some(*counter_sleep)
-        } else {
-            None
-        }
-    }
-
-    pub fn count_tick(&self) -> Option<u64> {
-        if let Self::Initialized(InitializedData { counter_tick, .. }) = self {
-            Some(*counter_tick)
-        } else {
-            None
-        }
-    }
-
-    pub fn duration(&self) -> Option<&Duration> {
-        if let Self::Initialized(InitializedData { duration, .. }) = self {
-            Some(duration)
-        } else {
-            None
-        }
-    }
-
-    pub fn increment_delay(&mut self) {
-        if let Self::Initialized(InitializedData { duration, .. }) = self {
-            // Set the duration, note that the duration is in 1s..10s
-            let secs = (duration.as_secs() + 1).clamp(1, 10);
-            *duration = Duration::from_secs(secs);
-        }
-    }
-
-    pub fn decrement_delay(&mut self) {
-        if let Self::Initialized(InitializedData { duration, .. }) = self {
-            // Set the duration, note that the duration is in 1s..10s
-            let secs = (duration.as_secs() - 1).clamp(1, 10);
-            *duration = Duration::from_secs(secs);
         }
     }
 }

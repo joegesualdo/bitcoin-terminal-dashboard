@@ -6,8 +6,11 @@ use tui::widgets::{Block, BorderType, Borders, Cell, Paragraph, Row, Table};
 use tui::Frame;
 
 mod average_block_time_for_last_2016_blocks;
+mod block_count_until_retarget;
 mod block_height_metric;
 mod chain_size;
+mod current_difficulty_epoch;
+mod difficulty;
 mod header_component;
 pub mod loading_component;
 mod metrics_line_component;
@@ -19,8 +22,11 @@ mod tps_for_last_30_days;
 mod utxo_set_size;
 
 use self::average_block_time_for_last_2016_blocks::average_block_time_for_last_2016_blocks_component;
+use self::block_count_until_retarget::block_count_until_retarget_component;
 use self::block_height_metric::block_height_metric_component;
 use self::chain_size::chain_size_metric_component;
+use self::current_difficulty_epoch::current_difficulty_epoch_component;
+use self::difficulty::difficulty_component;
 use self::header_component::metric_section_header_component;
 use self::metrics_line_component::metric_line_component;
 use self::new_transactions_count_over_last_30_days_metric::new_transactions_count_over_last_30_days_component;
@@ -53,6 +59,9 @@ pub fn metrics_section_component<'a>(
     let total_transaction_count = total_transactions_count_component(initialized_data);
     let tps_for_last_30_days = tps_for_last_30_days_component(initialized_data);
     let total_fees_for_last_24_hours = total_fees_for_last_24_hours_component(initialized_data);
+    let difficulty = difficulty_component(initialized_data);
+    let current_difficulty_epoch = current_difficulty_epoch_component(initialized_data);
+    let block_count_until_retarget = block_count_until_retarget_component(initialized_data);
 
     let paragraphs = vec![
         Spans(section_header),
@@ -65,6 +74,9 @@ pub fn metrics_section_component<'a>(
         Spans(total_transaction_count),
         Spans(tps_for_last_30_days),
         Spans(total_fees_for_last_24_hours),
+        Spans(difficulty),
+        Spans(current_difficulty_epoch),
+        Spans(block_count_until_retarget),
     ];
 
     let block = Block::default()

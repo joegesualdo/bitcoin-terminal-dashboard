@@ -17,6 +17,9 @@ pub enum Resource {
     TotalTransactionCount(FetchEvent<u64>),
     TpsForLast30Days(FetchEvent<f64>),
     TotalFeesForLast24Hours(FetchEvent<u64>),
+    Difficulty(FetchEvent<f64>),
+    CurrentDifficultyEpoch(FetchEvent<u64>),
+    BlockCountUntilRetarget(FetchEvent<f64>),
 }
 
 pub enum InputEvent {

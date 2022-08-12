@@ -201,6 +201,57 @@ fn start_loop_for_fetching_total_fees_for_last_24_hours(events: &Events) {
         sleep(Duration::from_secs(5 * 60));
     });
 }
+fn start_loop_for_fetching_difficulty(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::Difficulty(
+                FetchEvent::Start,
+            )));
+        let difficulty = bitcoin_node_query::get_difficulty(&c);
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::Difficulty(
+                FetchEvent::Complete(difficulty),
+            )));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+
+fn start_loop_for_fetching_current_difficulty_epoch(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::CurrentDifficultyEpoch(
+                FetchEvent::Start,
+            )));
+        let difficulty = bitcoin_node_query::get_current_difficulty_epoch(&c);
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::CurrentDifficultyEpoch(
+                FetchEvent::Complete(difficulty),
+            )));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_block_count_until_retarget(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::BlockCountUntilRetarget(FetchEvent::Start),
+        ));
+        let block_count_until_retarget = bitcoin_node_query::get_blocks_count_until_retarget(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::BlockCountUntilRetarget(FetchEvent::Complete(block_count_until_retarget)),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
 
 pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     // Configure Crossterm backend for tui
@@ -225,6 +276,9 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     start_loop_for_fetching_total_transaction_count(&events);
     start_loop_for_fetching_tps_for_last_30_days(&events);
     start_loop_for_fetching_total_fees_for_last_24_hours(&events);
+    start_loop_for_fetching_difficulty(&events);
+    start_loop_for_fetching_current_difficulty_epoch(&events);
+    start_loop_for_fetching_block_count_until_retarget(&events);
 
     loop {
         let mut app = app.borrow_mut();
