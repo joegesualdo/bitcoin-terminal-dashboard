@@ -7,6 +7,18 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4"
-jsonrpc = "0.13.0"
-bitcoin-node-query = "0.1.0"
 bitcoin-price = "0.1.2"
+
+log = "0.4"
+bitcoin-node-query = "0.1.1"
+jsonrpc = "0.13.0"
+time = { version = "0.2", default-features = false }
+
+# tui-logger = "0.6"
+tui-logger = { git = "https://github.com/gin66/tui-logger", rev = "3a3568e2464dddc2205e071234135998342d7f1d" }
+
+tui = { version = "0.15", features = ["crossterm"], default-features = false }
+crossterm = "0.19"
+tokio = { version = "1", features = ["full"] }
+
+eyre = "0.6"
