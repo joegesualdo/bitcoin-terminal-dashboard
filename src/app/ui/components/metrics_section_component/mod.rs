@@ -1,3 +1,4 @@
+use bitcoin_node_query::get_estimated_hash_rate_per_second_for_block_since_last_difficulty_change;
 use tui::backend::Backend;
 use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
@@ -6,15 +7,22 @@ use tui::widgets::{Block, BorderType, Borders, Cell, Paragraph, Row, Table};
 use tui::Frame;
 
 mod average_block_time_for_last_2016_blocks;
+mod average_block_time_since_last_difficulty_adjustement;
+mod bitcoin_price;
 mod block_count_until_retarget;
 mod block_height_metric;
+mod block_subsidy_of_most_recent_block;
+mod blocks_mined_over_last_24_hours;
 mod chain_size;
 mod current_difficulty_epoch;
 mod difficulty;
+mod estimated_hash_rate_per_second_for_last_2016_blocks;
+mod estimated_seconds_until_retarget;
 mod header_component;
 pub mod loading_component;
 mod metrics_line_component;
 mod new_transactions_count_over_last_30_days_metric;
+mod sats_per_dollar;
 mod seconds_since_new_block_metric;
 mod total_fees_for_last_24_hours;
 mod total_transaction_count;
@@ -22,14 +30,21 @@ mod tps_for_last_30_days;
 mod utxo_set_size;
 
 use self::average_block_time_for_last_2016_blocks::average_block_time_for_last_2016_blocks_component;
+use self::average_block_time_since_last_difficulty_adjustement::average_block_time_since_last_difficulty_adjustement_component;
+use self::bitcoin_price::bitcoin_price_component;
 use self::block_count_until_retarget::block_count_until_retarget_component;
 use self::block_height_metric::block_height_metric_component;
+use self::block_subsidy_of_most_recent_block::block_subsidy_of_most_recent_block_component;
+use self::blocks_mined_over_last_24_hours::blocks_mined_over_last_24_hours_component;
 use self::chain_size::chain_size_metric_component;
 use self::current_difficulty_epoch::current_difficulty_epoch_component;
 use self::difficulty::difficulty_component;
+use self::estimated_hash_rate_per_second_for_last_2016_blocks::estimated_hash_rate_per_second_for_last_2016_blocks_component;
+use self::estimated_seconds_until_retarget::estimated_seconds_until_retarget_component;
 use self::header_component::metric_section_header_component;
 use self::metrics_line_component::metric_line_component;
 use self::new_transactions_count_over_last_30_days_metric::new_transactions_count_over_last_30_days_component;
+use self::sats_per_dollar::sats_per_dollar_component;
 use self::seconds_since_new_block_metric::seconds_since_new_block_metric_component;
 use self::total_fees_for_last_24_hours::total_fees_for_last_24_hours_component;
 use self::total_transaction_count::total_transactions_count_component;
@@ -62,9 +77,23 @@ pub fn metrics_section_component<'a>(
     let difficulty = difficulty_component(initialized_data);
     let current_difficulty_epoch = current_difficulty_epoch_component(initialized_data);
     let block_count_until_retarget = block_count_until_retarget_component(initialized_data);
+    let estimated_seconds_until_retarget =
+        estimated_seconds_until_retarget_component(initialized_data);
+    let average_block_time_since_last_difficulty_adjustement =
+        average_block_time_since_last_difficulty_adjustement_component(initialized_data);
+    let bitcoin_price = bitcoin_price_component(initialized_data);
+    let sats_per_dollar = sats_per_dollar_component(initialized_data);
+    let estimated_hash_rate_per_second_for_last_2016_blocks =
+        estimated_hash_rate_per_second_for_last_2016_blocks_component(initialized_data);
+    let block_subsidy_of_most_recent_block =
+        block_subsidy_of_most_recent_block_component(initialized_data);
+    let blocks_mined_over_last_24_hours =
+        blocks_mined_over_last_24_hours_component(initialized_data);
 
     let paragraphs = vec![
         Spans(section_header),
+        Spans(bitcoin_price),
+        Spans(sats_per_dollar),
         Spans(blockchain_height),
         Spans(seconds_since_last_block),
         Spans(transactions_count_over_last_30_days),
@@ -77,6 +106,11 @@ pub fn metrics_section_component<'a>(
         Spans(difficulty),
         Spans(current_difficulty_epoch),
         Spans(block_count_until_retarget),
+        Spans(estimated_seconds_until_retarget),
+        Spans(average_block_time_since_last_difficulty_adjustement),
+        Spans(estimated_hash_rate_per_second_for_last_2016_blocks),
+        Spans(block_subsidy_of_most_recent_block),
+        Spans(blocks_mined_over_last_24_hours),
     ];
 
     let block = Block::default()

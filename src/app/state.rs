@@ -12,6 +12,7 @@ pub enum FetchStatus<T> {
 
 #[derive(Clone)]
 pub struct Stats {
+    pub bitcoin_price: FetchStatus<f64>,
     pub block_height: FetchStatus<u64>,
     pub last_block_time: u64,
     pub average_block_time: u64,
@@ -26,6 +27,11 @@ pub struct Stats {
     pub difficulty: FetchStatus<f64>,
     pub current_difficulty_epoch: FetchStatus<u64>,
     pub block_count_until_retarget: FetchStatus<f64>,
+    pub estimated_seconds_until_retarget: FetchStatus<f64>,
+    pub average_block_time_since_last_difficulty_adjustement: FetchStatus<u64>,
+    pub estimated_hash_rate_per_second_for_last_2016_blocks: FetchStatus<f64>,
+    pub block_subsidy_of_most_recent_block: FetchStatus<u64>,
+    pub blocks_mined_over_last_24_hours: FetchStatus<u64>,
 }
 
 #[derive(Clone)]
@@ -48,6 +54,7 @@ impl AppState {
         let duration = Duration::from_secs(1);
         let counter_sleep = 0;
         let counter_tick = 0;
+        let bitcoin_price = FetchStatus::NotStarted;
         let block_height = FetchStatus::NotStarted;
         let last_block_time = 38999993832;
         let average_block_time = 9600;
@@ -62,11 +69,18 @@ impl AppState {
         let difficulty = FetchStatus::NotStarted;
         let current_difficulty_epoch = FetchStatus::NotStarted;
         let block_count_until_retarget = FetchStatus::NotStarted;
+        let estimated_seconds_until_retarget = FetchStatus::NotStarted;
+        let average_block_time_since_last_difficulty_adjustement = FetchStatus::NotStarted;
+        let estimated_hash_rate_per_second_for_last_2016_blocks = FetchStatus::NotStarted;
+        let block_subsidy_of_most_recent_block = FetchStatus::NotStarted;
+        let blocks_mined_over_last_24_hours = FetchStatus::NotStarted;
+
         Self::Initialized(InitializedData {
             duration,
             counter_sleep,
             counter_tick,
             stats: Stats {
+                bitcoin_price,
                 block_height,
                 last_block_time,
                 average_block_time,
@@ -81,6 +95,11 @@ impl AppState {
                 difficulty,
                 current_difficulty_epoch,
                 block_count_until_retarget,
+                estimated_seconds_until_retarget,
+                average_block_time_since_last_difficulty_adjustement,
+                estimated_hash_rate_per_second_for_last_2016_blocks,
+                block_subsidy_of_most_recent_block,
+                blocks_mined_over_last_24_hours,
             },
             newest_block_found_height: None,
         })
@@ -154,6 +173,7 @@ impl AppState {
         if let Self::Initialized(InitializedData {
             stats:
                 Stats {
+                    bitcoin_price,
                     block_height,
                     seconds_since_last_block,
                     transactions_count_over_last_30_days,
@@ -166,12 +186,30 @@ impl AppState {
                     difficulty,
                     current_difficulty_epoch,
                     block_count_until_retarget,
+                    estimated_seconds_until_retarget,
+                    average_block_time_since_last_difficulty_adjustement,
+                    estimated_hash_rate_per_second_for_last_2016_blocks,
+                    block_subsidy_of_most_recent_block,
+                    blocks_mined_over_last_24_hours,
                     ..
                 },
             ..
         }) = self
         {
             match resource {
+                Resource::BitcoinPrice(event) => match event {
+                    FetchEvent::Start => {
+                        *bitcoin_price = FetchStatus::InProgress(match bitcoin_price {
+                            FetchStatus::Complete(old_value) => Some(*old_value),
+                            FetchStatus::NotStarted => None,
+                            FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                    // InProgress
+                        })
+                    }
+                    FetchEvent::Complete(new_bitcoin_price) => {
+                        *bitcoin_price = FetchStatus::Complete(new_bitcoin_price);
+                    }
+                },
                 Resource::NewBlockHeight(event) => match event {
                     FetchEvent::Start => {
                         *block_height = FetchStatus::InProgress(match block_height {
@@ -341,6 +379,93 @@ impl AppState {
                     FetchEvent::Complete(new_block_count_until_retarget) => {
                         *block_count_until_retarget =
                             FetchStatus::Complete(new_block_count_until_retarget);
+                    }
+                },
+                Resource::EstimatedSecondsUntilRetarget(event) => match event {
+                    FetchEvent::Start => {
+                        *estimated_seconds_until_retarget =
+                            FetchStatus::InProgress(match estimated_seconds_until_retarget {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_estimated_seconds_until_retarget) => {
+                        *estimated_seconds_until_retarget =
+                            FetchStatus::Complete(new_estimated_seconds_until_retarget);
+                    }
+                },
+                Resource::AverageBlockTimeSinceLastDifficultyAdjustment(event) => match event {
+                    FetchEvent::Start => {
+                        *average_block_time_since_last_difficulty_adjustement =
+                            FetchStatus::InProgress(
+                                match average_block_time_since_last_difficulty_adjustement {
+                                    FetchStatus::Complete(old_value) => Some(*old_value),
+                                    FetchStatus::NotStarted => None,
+                                    FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                            // InProgress
+                                },
+                            )
+                    }
+                    FetchEvent::Complete(
+                        new_average_block_time_since_last_difficulty_adjustement,
+                    ) => {
+                        *average_block_time_since_last_difficulty_adjustement =
+                            FetchStatus::Complete(
+                                new_average_block_time_since_last_difficulty_adjustement,
+                            );
+                    }
+                },
+                Resource::EstimatedHashRatePerSecondForLast2016Blocks(event) => match event {
+                    FetchEvent::Start => {
+                        *estimated_hash_rate_per_second_for_last_2016_blocks =
+                            FetchStatus::InProgress(
+                                match estimated_hash_rate_per_second_for_last_2016_blocks {
+                                    FetchStatus::Complete(old_value) => Some(*old_value),
+                                    FetchStatus::NotStarted => None,
+                                    FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                            // InProgress
+                                },
+                            )
+                    }
+                    FetchEvent::Complete(
+                        new_estimated_hash_rate_per_second_for_last_2016_blocks,
+                    ) => {
+                        *estimated_hash_rate_per_second_for_last_2016_blocks =
+                            FetchStatus::Complete(
+                                new_estimated_hash_rate_per_second_for_last_2016_blocks,
+                            );
+                    }
+                },
+                Resource::BlockSubsidyOfMostRecentBlock(event) => match event {
+                    FetchEvent::Start => {
+                        *block_subsidy_of_most_recent_block =
+                            FetchStatus::InProgress(match block_subsidy_of_most_recent_block {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_block_subsidy_of_most_recent_block) => {
+                        *block_subsidy_of_most_recent_block =
+                            FetchStatus::Complete(new_block_subsidy_of_most_recent_block);
+                    }
+                },
+                Resource::BlocksMinedOverLast24Hours(event) => match event {
+                    FetchEvent::Start => {
+                        *blocks_mined_over_last_24_hours =
+                            FetchStatus::InProgress(match blocks_mined_over_last_24_hours {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_blocks_mined_over_last_24_hours) => {
+                        *blocks_mined_over_last_24_hours =
+                            FetchStatus::Complete(new_blocks_mined_over_last_24_hours);
                     }
                 },
                 //TransactionsCountOverLast30Days(FetchEvent<u64>),

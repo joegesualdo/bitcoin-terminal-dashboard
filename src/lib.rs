@@ -58,6 +58,26 @@ fn start_loop_for_fetching_seconds_since_last_block(events: &Events) {
     });
 }
 
+fn start_loop_for_fetching_bitcoin_price(events: &Events) {
+    let tx = events.tx.clone();
+    let event = tx.clone();
+    thread::spawn(move || loop {
+        // TODO: Handle error
+        let _ = event
+            .clone()
+            .send(InputEvent::FetchResource(Resource::BitcoinPrice(
+                FetchEvent::Start,
+            )));
+        let bitcoin_price = bitcoin_price::get_average_exchange_spot_price();
+        // TODO: Handle error
+        let _ = event
+            .clone()
+            .send(InputEvent::FetchResource(Resource::BitcoinPrice(
+                FetchEvent::Complete(bitcoin_price),
+            )));
+        sleep(Duration::from_secs(30));
+    });
+}
 fn start_loop_for_fetching_new_block_height(events: &Events) {
     let tx = events.tx.clone();
     let event_tx_for_new_block_height = tx.clone();
@@ -252,6 +272,92 @@ fn start_loop_for_fetching_block_count_until_retarget(events: &Events) {
         sleep(Duration::from_secs(5 * 60));
     });
 }
+fn start_loop_for_fetching_estimated_seconds_until_retarget(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::EstimatedSecondsUntilRetarget(FetchEvent::Start),
+        ));
+        let estimated_seconds_until_retarget =
+            bitcoin_node_query::get_estimated_seconds_until_retarget(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::EstimatedSecondsUntilRetarget(FetchEvent::Complete(
+                estimated_seconds_until_retarget,
+            )),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_average_block_time_since_last_difficulty_adjustement(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::AverageBlockTimeSinceLastDifficultyAdjustment(FetchEvent::Start),
+        ));
+        let average_block_time_since_last_difficulty_adjustement =
+            bitcoin_node_query::get_average_block_time_for_since_last_difficulty_adjustement(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::AverageBlockTimeSinceLastDifficultyAdjustment(FetchEvent::Complete(
+                average_block_time_since_last_difficulty_adjustement,
+            )),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+
+fn start_loop_for_fetching_hash_rate_per_second_for_last_2016_blocks(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::EstimatedHashRatePerSecondForLast2016Blocks(FetchEvent::Start),
+        ));
+        let estimated_hash_rate_per_second_for_last_2016_blocks =
+            bitcoin_node_query::get_estimated_hash_rate_per_second_for_last_2016_blocks(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::EstimatedHashRatePerSecondForLast2016Blocks(FetchEvent::Complete(
+                estimated_hash_rate_per_second_for_last_2016_blocks,
+            )),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_block_subsidy_of_most_recent_block(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::BlockSubsidyOfMostRecentBlock(FetchEvent::Start),
+        ));
+        let block_subsidy_of_most_recent_block =
+            bitcoin_node_query::get_block_subsidy_of_most_recent_block(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::BlockSubsidyOfMostRecentBlock(FetchEvent::Complete(
+                block_subsidy_of_most_recent_block,
+            )),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_blocks_mined_over_last_24_hours(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::BlocksMinedOverLast24Hours(FetchEvent::Start),
+        ));
+        let blocks_mined_over_last_24_hours =
+            bitcoin_node_query::get_blocks_mined_over_last_24_hours_count(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::BlocksMinedOverLast24Hours(FetchEvent::Complete(
+                blocks_mined_over_last_24_hours,
+            )),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
 
 pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     // Configure Crossterm backend for tui
@@ -266,6 +372,7 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     let tick_rate = Duration::from_millis(200);
     let events = Events::new(tick_rate);
 
+    start_loop_for_fetching_bitcoin_price(&events);
     start_loop_for_fetching_seconds_since_last_block(&events);
     start_loop_for_fetching_transactions_count_over_last_30_days(&events);
     start_loop_for_fetching_new_block_height(&events);
@@ -279,6 +386,11 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     start_loop_for_fetching_difficulty(&events);
     start_loop_for_fetching_current_difficulty_epoch(&events);
     start_loop_for_fetching_block_count_until_retarget(&events);
+    start_loop_for_fetching_estimated_seconds_until_retarget(&events);
+    start_loop_for_fetching_average_block_time_since_last_difficulty_adjustement(&events);
+    start_loop_for_fetching_hash_rate_per_second_for_last_2016_blocks(&events);
+    start_loop_for_fetching_block_subsidy_of_most_recent_block(&events);
+    start_loop_for_fetching_blocks_mined_over_last_24_hours(&events);
 
     loop {
         let mut app = app.borrow_mut();
