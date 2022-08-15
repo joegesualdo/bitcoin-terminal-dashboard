@@ -63,14 +63,33 @@ use crate::app::ui::BITCOIN_ORANGE_COLOR;
 use crate::app::App;
 use crate::utils::{format_duration, format_number, format_number_string};
 
-pub fn metrics_section_component<'a>(
+pub fn market_data_component<'a>(
     initialized_data: &'a InitializedData,
     state: &'a AppState,
 ) -> Paragraph<'a> {
-    // Heading
-    let section_header = metric_section_header_component("Blockchain stats");
+    let bitcoin_price = bitcoin_price_component(initialized_data);
+    let sats_per_dollar = sats_per_dollar_component(initialized_data);
+    let paragraphs = vec![Spans(bitcoin_price), Spans(sats_per_dollar)];
 
-    // Lines
+    let market_data_block = Block::default()
+        .borders(Borders::ALL)
+        .title("Market data")
+        .border_type(BorderType::Rounded);
+
+    let foreground_color = Color::LightCyan;
+    let style = Style::default().fg(foreground_color);
+    let alignment = Alignment::Left;
+
+    Paragraph::new(paragraphs)
+        .block(market_data_block)
+        .style(style)
+        .alignment(alignment)
+}
+
+pub fn blockchain_data_component<'a>(
+    initialized_data: &'a InitializedData,
+    state: &'a AppState,
+) -> Paragraph<'a> {
     let blockchain_height = block_height_metric_component(initialized_data);
     let seconds_since_last_block = seconds_since_new_block_metric_component(initialized_data);
     let transactions_count_over_last_30_days =
@@ -79,9 +98,60 @@ pub fn metrics_section_component<'a>(
         average_block_time_for_last_2016_blocks_component(initialized_data);
     let chain_size = chain_size_metric_component(initialized_data);
     let utxo_set_size = utxo_set_size_component(initialized_data);
+    let paragraphs = vec![
+        Spans(blockchain_height),
+        Spans(seconds_since_last_block),
+        Spans(transactions_count_over_last_30_days),
+        Spans(average_block_time_for_last_2016_blocks),
+        Spans(chain_size),
+    ];
+
+    let market_data_block = Block::default()
+        .borders(Borders::ALL)
+        .title("Blockchain data")
+        .border_type(BorderType::Rounded);
+
+    let foreground_color = Color::LightCyan;
+    let style = Style::default().fg(foreground_color);
+    let alignment = Alignment::Left;
+
+    Paragraph::new(paragraphs)
+        .block(market_data_block)
+        .style(style)
+        .alignment(alignment)
+}
+
+pub fn transactions_data_component<'a>(
+    initialized_data: &'a InitializedData,
+    state: &'a AppState,
+) -> Paragraph<'a> {
     let total_transaction_count = total_transactions_count_component(initialized_data);
     let tps_for_last_30_days = tps_for_last_30_days_component(initialized_data);
     let total_fees_for_last_24_hours = total_fees_for_last_24_hours_component(initialized_data);
+    let paragraphs = vec![
+        Spans(total_transaction_count),
+        Spans(tps_for_last_30_days),
+        Spans(total_fees_for_last_24_hours),
+    ];
+
+    let market_data_block = Block::default()
+        .borders(Borders::ALL)
+        .title("Transaction data")
+        .border_type(BorderType::Rounded);
+
+    let foreground_color = Color::LightCyan;
+    let style = Style::default().fg(foreground_color);
+    let alignment = Alignment::Left;
+
+    Paragraph::new(paragraphs)
+        .block(market_data_block)
+        .style(style)
+        .alignment(alignment)
+}
+pub fn difficulty_data_component<'a>(
+    initialized_data: &'a InitializedData,
+    state: &'a AppState,
+) -> Paragraph<'a> {
     let difficulty = difficulty_component(initialized_data);
     let current_difficulty_epoch = current_difficulty_epoch_component(initialized_data);
     let block_count_until_retarget = block_count_until_retarget_component(initialized_data);
@@ -89,8 +159,33 @@ pub fn metrics_section_component<'a>(
         estimated_seconds_until_retarget_component(initialized_data);
     let average_block_time_since_last_difficulty_adjustement =
         average_block_time_since_last_difficulty_adjustement_component(initialized_data);
-    let bitcoin_price = bitcoin_price_component(initialized_data);
-    let sats_per_dollar = sats_per_dollar_component(initialized_data);
+    let paragraphs = vec![
+        Spans(difficulty),
+        Spans(current_difficulty_epoch),
+        Spans(block_count_until_retarget),
+        Spans(estimated_seconds_until_retarget),
+        Spans(average_block_time_since_last_difficulty_adjustement),
+    ];
+
+    let market_data_block = Block::default()
+        .borders(Borders::ALL)
+        .title("Difficulty data")
+        .border_type(BorderType::Rounded);
+
+    let foreground_color = Color::LightCyan;
+    let style = Style::default().fg(foreground_color);
+    let alignment = Alignment::Left;
+
+    Paragraph::new(paragraphs)
+        .block(market_data_block)
+        .style(style)
+        .alignment(alignment)
+}
+
+pub fn mining_data_component<'a>(
+    initialized_data: &'a InitializedData,
+    state: &'a AppState,
+) -> Paragraph<'a> {
     let estimated_hash_rate_per_second_for_last_2016_blocks =
         estimated_hash_rate_per_second_for_last_2016_blocks_component(initialized_data);
     let block_subsidy_of_most_recent_block =
@@ -105,25 +200,7 @@ pub fn metrics_section_component<'a>(
         fees_as_a_percent_of_reward_for_last_2016_blocks_component(initialized_data);
     let fees_as_a_percent_of_reward_for_last_24_hours =
         fees_as_a_percent_of_reward_for_last_24_hours_component(initialized_data);
-
     let paragraphs = vec![
-        Spans(section_header),
-        Spans(bitcoin_price),
-        Spans(sats_per_dollar),
-        Spans(blockchain_height),
-        Spans(seconds_since_last_block),
-        Spans(transactions_count_over_last_30_days),
-        Spans(average_block_time_for_last_2016_blocks),
-        Spans(chain_size),
-        Spans(utxo_set_size),
-        Spans(total_transaction_count),
-        Spans(tps_for_last_30_days),
-        Spans(total_fees_for_last_24_hours),
-        Spans(difficulty),
-        Spans(current_difficulty_epoch),
-        Spans(block_count_until_retarget),
-        Spans(estimated_seconds_until_retarget),
-        Spans(average_block_time_since_last_difficulty_adjustement),
         Spans(estimated_hash_rate_per_second_for_last_2016_blocks),
         Spans(block_subsidy_of_most_recent_block),
         Spans(blocks_mined_over_last_24_hours),
@@ -133,17 +210,17 @@ pub fn metrics_section_component<'a>(
         Spans(fees_as_a_percent_of_reward_for_last_2016_blocks),
     ];
 
-    let block = Block::default()
+    let market_data_block = Block::default()
         .borders(Borders::ALL)
-        .style(Style::default().fg(Color::White))
-        .border_type(BorderType::Plain);
+        .title("Mining data")
+        .border_type(BorderType::Rounded);
 
     let foreground_color = Color::LightCyan;
     let style = Style::default().fg(foreground_color);
     let alignment = Alignment::Left;
 
     Paragraph::new(paragraphs)
-        .block(block)
+        .block(market_data_block)
         .style(style)
         .alignment(alignment)
 }

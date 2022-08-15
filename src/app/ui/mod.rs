@@ -7,7 +7,10 @@ use tui::widgets::{Block, BorderType, Borders, Cell, Paragraph, Row, Table};
 use tui::Frame;
 
 use self::components::metrics_section_component::loading_component::metrics_section_loading_component;
-use self::components::metrics_section_component::metrics_section_component;
+use self::components::metrics_section_component::{
+    blockchain_data_component, difficulty_data_component, market_data_component,
+    mining_data_component, transactions_data_component,
+};
 use super::actions::Actions;
 use super::state::{AppState, InitializedData, Stats};
 use crate::app::state::FetchStatus;
@@ -36,15 +39,6 @@ fn title_component<'a>() -> Paragraph<'a> {
                 .style(Style::default().fg(Color::Blue))
                 .border_type(BorderType::Rounded),
         )
-}
-
-fn body_component<'a>(loading: bool, state: &'a AppState) -> Paragraph<'a> {
-    match state {
-        AppState::Init => metrics_section_loading_component(),
-        AppState::Initialized(initialized_data) => {
-            metrics_section_component(initialized_data, state)
-        }
-    }
 }
 
 fn help_section_component(actions: &Actions) -> Table {
@@ -107,7 +101,7 @@ where
     // Body: metrics & Help
     let body_chunks = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(75), Constraint::Percentage(25)].as_ref())
+        .constraints([Constraint::Percentage(80), Constraint::Percentage(20)].as_ref())
         .split(app_chunks[1]);
 
     //let body_component = body_component(false, app.state());
@@ -139,16 +133,29 @@ where
         .title("Random data")
         .border_type(BorderType::Rounded);
 
-    let metric_blocks = vec![
-        market_data_block,
-        blockchain_data,
-        mining_data,
-        difficulty_data,
-        random_data,
-    ];
+    //let metric_blocks = vec![
+    //    market_data_block,
+    //    blockchain_data,
+    //    mining_data,
+    //    difficulty_data,
+    //    random_data,
+    //];
+
+    let metric_blocks = match app.state() {
+        AppState::Init => vec![],
+        AppState::Initialized(initialized_data) => {
+            vec![
+                market_data_component(&initialized_data, app.state()),
+                blockchain_data_component(&initialized_data, app.state()),
+                transactions_data_component(initialized_data, app.state()),
+                difficulty_data_component(initialized_data, app.state()),
+                mining_data_component(initialized_data, app.state()),
+            ]
+        }
+    };
 
     let is_small_screen = size.width < 200;
-    let max_columns_count = 5;
+    let max_columns_count = 3;
     let horizontal_metrics_chunks_count_per_vertical_chunk = if is_small_screen {
         1
     } else {
