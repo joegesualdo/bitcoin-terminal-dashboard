@@ -23,7 +23,7 @@ pub fn average_block_time_for_last_2016_blocks_component<'a>(
     let average_block_time_for_last_2016_blocks =
         format!("{}", average_block_time_for_last_2016_blocks);
     let average_block_time_for_last_2016_blocks_spans = metric_line_component(
-        "Average Block Time For Last 2016 Blocks",
+        "Average Block Time (2016 Blocks)",
         average_block_time_for_last_2016_blocks,
     );
     average_block_time_for_last_2016_blocks_spans
