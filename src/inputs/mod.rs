@@ -26,6 +26,10 @@ pub enum Resource {
     EstimatedHashRatePerSecondForLast2016Blocks(FetchEvent<f64>),
     BlockSubsidyOfMostRecentBlock(FetchEvent<u64>),
     BlocksMinedOverLast24Hours(FetchEvent<u64>),
+    AverageFeesPerBlockOverLast24Hours(FetchEvent<u64>),
+    AverageFeesPerBlockOverLast2016Blocks(FetchEvent<u64>),
+    FeesAsAPercentOfRewardForLast2016Blocks(FetchEvent<f64>),
+    FeesAsAPercentOfRewardForLast24Hours(FetchEvent<f64>),
 }
 
 pub enum InputEvent {

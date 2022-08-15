@@ -9,7 +9,7 @@ pub fn block_height_metric_component<'a>(initialized_data: &'a InitializedData) 
         FetchStatus::Complete(block_height) => format_number(block_height),
         FetchStatus::NotStarted => "Not Started...".to_string(),
         FetchStatus::InProgress(maybe_old_value) => match maybe_old_value {
-            Some(old_value) => format!("{} (loading...)", old_value),
+            Some(old_value) => format!("{} (↻)", format_number(old_value)),
             None => "Loading...".to_string(),
         },
     };

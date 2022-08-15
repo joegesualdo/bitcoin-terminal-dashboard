@@ -32,6 +32,10 @@ pub struct Stats {
     pub estimated_hash_rate_per_second_for_last_2016_blocks: FetchStatus<f64>,
     pub block_subsidy_of_most_recent_block: FetchStatus<u64>,
     pub blocks_mined_over_last_24_hours: FetchStatus<u64>,
+    pub average_fees_per_block_over_last_24_hours: FetchStatus<u64>,
+    pub average_fees_per_block_over_last_2016_blocks: FetchStatus<u64>,
+    pub fees_as_a_percent_of_reward_for_last_2016_blocks: FetchStatus<f64>,
+    pub fees_as_a_percent_of_reward_for_last_24_hours: FetchStatus<f64>,
 }
 
 #[derive(Clone)]
@@ -74,6 +78,10 @@ impl AppState {
         let estimated_hash_rate_per_second_for_last_2016_blocks = FetchStatus::NotStarted;
         let block_subsidy_of_most_recent_block = FetchStatus::NotStarted;
         let blocks_mined_over_last_24_hours = FetchStatus::NotStarted;
+        let average_fees_per_block_over_last_24_hours = FetchStatus::NotStarted;
+        let average_fees_per_block_over_last_2016_blocks = FetchStatus::NotStarted;
+        let fees_as_a_percent_of_reward_for_last_2016_blocks = FetchStatus::NotStarted;
+        let fees_as_a_percent_of_reward_for_last_24_hours = FetchStatus::NotStarted;
 
         Self::Initialized(InitializedData {
             duration,
@@ -100,6 +108,10 @@ impl AppState {
                 estimated_hash_rate_per_second_for_last_2016_blocks,
                 block_subsidy_of_most_recent_block,
                 blocks_mined_over_last_24_hours,
+                average_fees_per_block_over_last_24_hours,
+                average_fees_per_block_over_last_2016_blocks,
+                fees_as_a_percent_of_reward_for_last_2016_blocks,
+                fees_as_a_percent_of_reward_for_last_24_hours,
             },
             newest_block_found_height: None,
         })
@@ -191,6 +203,10 @@ impl AppState {
                     estimated_hash_rate_per_second_for_last_2016_blocks,
                     block_subsidy_of_most_recent_block,
                     blocks_mined_over_last_24_hours,
+                    average_fees_per_block_over_last_24_hours,
+                    average_fees_per_block_over_last_2016_blocks,
+                    fees_as_a_percent_of_reward_for_last_2016_blocks,
+                    fees_as_a_percent_of_reward_for_last_24_hours,
                     ..
                 },
             ..
@@ -468,8 +484,72 @@ impl AppState {
                             FetchStatus::Complete(new_blocks_mined_over_last_24_hours);
                     }
                 },
-                //TransactionsCountOverLast30Days(FetchEvent<u64>),
-                //AverageBlockTimeForLast2016Blocks(FetchEvent<u64>),
+                Resource::AverageFeesPerBlockOverLast24Hours(event) => match event {
+                    FetchEvent::Start => {
+                        *average_fees_per_block_over_last_24_hours =
+                            FetchStatus::InProgress(match average_fees_per_block_over_last_24_hours
+                            {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_average_fees_per_block_over_last_24_hours) => {
+                        *average_fees_per_block_over_last_24_hours =
+                            FetchStatus::Complete(new_average_fees_per_block_over_last_24_hours);
+                    }
+                },
+                Resource::AverageFeesPerBlockOverLast2016Blocks(event) => match event {
+                    FetchEvent::Start => {
+                        *average_fees_per_block_over_last_2016_blocks = FetchStatus::InProgress(
+                            match average_fees_per_block_over_last_2016_blocks {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            },
+                        )
+                    }
+                    FetchEvent::Complete(new_average_fees_per_block_over_last_2016_blocks) => {
+                        *average_fees_per_block_over_last_2016_blocks =
+                            FetchStatus::Complete(new_average_fees_per_block_over_last_2016_blocks);
+                    }
+                },
+                Resource::FeesAsAPercentOfRewardForLast2016Blocks(event) => match event {
+                    FetchEvent::Start => {
+                        *fees_as_a_percent_of_reward_for_last_2016_blocks = FetchStatus::InProgress(
+                            match fees_as_a_percent_of_reward_for_last_2016_blocks {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            },
+                        )
+                    }
+                    FetchEvent::Complete(new_fees_as_a_percent_of_reward_for_last_2016_blocks) => {
+                        *fees_as_a_percent_of_reward_for_last_2016_blocks = FetchStatus::Complete(
+                            new_fees_as_a_percent_of_reward_for_last_2016_blocks,
+                        );
+                    }
+                },
+                Resource::FeesAsAPercentOfRewardForLast24Hours(event) => match event {
+                    FetchEvent::Start => {
+                        *fees_as_a_percent_of_reward_for_last_24_hours = FetchStatus::InProgress(
+                            match fees_as_a_percent_of_reward_for_last_24_hours {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            },
+                        )
+                    }
+                    FetchEvent::Complete(new_fees_as_a_percent_of_reward_for_last_24_hours) => {
+                        *fees_as_a_percent_of_reward_for_last_24_hours = FetchStatus::Complete(
+                            new_fees_as_a_percent_of_reward_for_last_24_hours,
+                        );
+                    }
+                },
             }
         }
     }

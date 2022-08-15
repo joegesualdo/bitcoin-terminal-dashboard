@@ -8,6 +8,8 @@ use tui::Frame;
 
 mod average_block_time_for_last_2016_blocks;
 mod average_block_time_since_last_difficulty_adjustement;
+mod average_fees_per_block_over_last_2016_blocks;
+mod average_fees_per_block_over_last_24_hours;
 mod bitcoin_price;
 mod block_count_until_retarget;
 mod block_height_metric;
@@ -18,6 +20,8 @@ mod current_difficulty_epoch;
 mod difficulty;
 mod estimated_hash_rate_per_second_for_last_2016_blocks;
 mod estimated_seconds_until_retarget;
+mod fees_as_a_percent_of_reward_for_last_2016_blocks;
+mod fees_as_a_percent_of_reward_for_last_24_hours;
 mod header_component;
 pub mod loading_component;
 mod metrics_line_component;
@@ -31,6 +35,8 @@ mod utxo_set_size;
 
 use self::average_block_time_for_last_2016_blocks::average_block_time_for_last_2016_blocks_component;
 use self::average_block_time_since_last_difficulty_adjustement::average_block_time_since_last_difficulty_adjustement_component;
+use self::average_fees_per_block_over_last_2016_blocks::average_fees_per_block_over_last_2016_blocks_component;
+use self::average_fees_per_block_over_last_24_hours::average_fees_per_block_over_last_24_hours_component;
 use self::bitcoin_price::bitcoin_price_component;
 use self::block_count_until_retarget::block_count_until_retarget_component;
 use self::block_height_metric::block_height_metric_component;
@@ -41,6 +47,8 @@ use self::current_difficulty_epoch::current_difficulty_epoch_component;
 use self::difficulty::difficulty_component;
 use self::estimated_hash_rate_per_second_for_last_2016_blocks::estimated_hash_rate_per_second_for_last_2016_blocks_component;
 use self::estimated_seconds_until_retarget::estimated_seconds_until_retarget_component;
+use self::fees_as_a_percent_of_reward_for_last_2016_blocks::fees_as_a_percent_of_reward_for_last_2016_blocks_component;
+use self::fees_as_a_percent_of_reward_for_last_24_hours::fees_as_a_percent_of_reward_for_last_24_hours_component;
 use self::header_component::metric_section_header_component;
 use self::metrics_line_component::metric_line_component;
 use self::new_transactions_count_over_last_30_days_metric::new_transactions_count_over_last_30_days_component;
@@ -89,6 +97,14 @@ pub fn metrics_section_component<'a>(
         block_subsidy_of_most_recent_block_component(initialized_data);
     let blocks_mined_over_last_24_hours =
         blocks_mined_over_last_24_hours_component(initialized_data);
+    let average_fees_per_block_over_last_24_hours =
+        average_fees_per_block_over_last_24_hours_component(initialized_data);
+    let average_fees_per_block_over_last_2016_blocks =
+        average_fees_per_block_over_last_2016_blocks_component(initialized_data);
+    let fees_as_a_percent_of_reward_for_last_2016_blocks =
+        fees_as_a_percent_of_reward_for_last_2016_blocks_component(initialized_data);
+    let fees_as_a_percent_of_reward_for_last_24_hours =
+        fees_as_a_percent_of_reward_for_last_24_hours_component(initialized_data);
 
     let paragraphs = vec![
         Spans(section_header),
@@ -111,6 +127,10 @@ pub fn metrics_section_component<'a>(
         Spans(estimated_hash_rate_per_second_for_last_2016_blocks),
         Spans(block_subsidy_of_most_recent_block),
         Spans(blocks_mined_over_last_24_hours),
+        Spans(average_fees_per_block_over_last_24_hours),
+        Spans(average_fees_per_block_over_last_2016_blocks),
+        Spans(fees_as_a_percent_of_reward_for_last_24_hours),
+        Spans(fees_as_a_percent_of_reward_for_last_2016_blocks),
     ];
 
     let block = Block::default()

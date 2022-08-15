@@ -75,7 +75,7 @@ fn start_loop_for_fetching_bitcoin_price(events: &Events) {
             .send(InputEvent::FetchResource(Resource::BitcoinPrice(
                 FetchEvent::Complete(bitcoin_price),
             )));
-        sleep(Duration::from_secs(30));
+        sleep(Duration::from_secs(60));
     });
 }
 fn start_loop_for_fetching_new_block_height(events: &Events) {
@@ -358,6 +358,74 @@ fn start_loop_for_fetching_blocks_mined_over_last_24_hours(events: &Events) {
         sleep(Duration::from_secs(5 * 60));
     });
 }
+fn start_loop_for_fetching_average_fees_per_block_over_last_24_hours(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::AverageFeesPerBlockOverLast24Hours(FetchEvent::Start),
+        ));
+        let average_fees_per_block_over_last_24_hours =
+            bitcoin_node_query::get_average_fees_per_block_over_last_24_hours(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::AverageFeesPerBlockOverLast24Hours(FetchEvent::Complete(
+                average_fees_per_block_over_last_24_hours,
+            )),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_average_fees_per_block_over_last_2016_blocks(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::AverageFeesPerBlockOverLast2016Blocks(FetchEvent::Start),
+        ));
+        let average_fees_per_block_over_last_2016_blocks =
+            bitcoin_node_query::get_average_fees_per_block_over_last_2016_blocks(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::AverageFeesPerBlockOverLast2016Blocks(FetchEvent::Complete(
+                average_fees_per_block_over_last_2016_blocks,
+            )),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_fees_as_a_percent_of_reward_for_last_2016_blocks(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::FeesAsAPercentOfRewardForLast2016Blocks(FetchEvent::Start),
+        ));
+        let fees_as_a_percent_of_reward_for_last_2016_blocks =
+            bitcoin_node_query::get_fees_as_a_percent_of_reward_for_last_2016_blocks(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::FeesAsAPercentOfRewardForLast2016Blocks(FetchEvent::Complete(
+                fees_as_a_percent_of_reward_for_last_2016_blocks,
+            )),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
+fn start_loop_for_fetching_fees_as_a_percent_of_reward_for_last_24_hours(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::FeesAsAPercentOfRewardForLast24Hours(FetchEvent::Start),
+        ));
+        let fees_as_a_percent_of_reward_for_last_24_hours =
+            bitcoin_node_query::get_fees_as_a_percent_of_reward_for_last_24_hours(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::FeesAsAPercentOfRewardForLast24Hours(FetchEvent::Complete(
+                fees_as_a_percent_of_reward_for_last_24_hours,
+            )),
+        ));
+        sleep(Duration::from_secs(5 * 60));
+    });
+}
 
 pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     // Configure Crossterm backend for tui
@@ -391,6 +459,10 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     start_loop_for_fetching_hash_rate_per_second_for_last_2016_blocks(&events);
     start_loop_for_fetching_block_subsidy_of_most_recent_block(&events);
     start_loop_for_fetching_blocks_mined_over_last_24_hours(&events);
+    start_loop_for_fetching_average_fees_per_block_over_last_24_hours(&events);
+    start_loop_for_fetching_average_fees_per_block_over_last_2016_blocks(&events);
+    start_loop_for_fetching_fees_as_a_percent_of_reward_for_last_2016_blocks(&events);
+    start_loop_for_fetching_fees_as_a_percent_of_reward_for_last_24_hours(&events);
 
     loop {
         let mut app = app.borrow_mut();
