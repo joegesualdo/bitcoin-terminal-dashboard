@@ -64,20 +64,20 @@ use crate::app::App;
 use crate::utils::{format_duration, format_number, format_number_string};
 
 fn components_to_label_and_value_spans<'a>(
-    components: Vec<Vec<Span<'a>>>,
+    components: Vec<Vec<Spans<'a>>>,
 ) -> (Vec<Spans<'a>>, Vec<Spans<'a>>) {
     let labels_spans = components
         .iter()
-        .map(|component_span| Spans(vec![component_span[0].clone()]))
+        .map(|component_span| component_span[0].clone())
         .collect();
     let value_spans = components
         .iter()
-        .map(|component_span| Spans(vec![component_span[1].clone()]))
+        .map(|component_span| component_span[1].clone())
         .collect();
     (labels_spans, value_spans)
 }
 fn components_to_key_value_paragraphs<'a>(
-    components: Vec<Vec<Span<'a>>>,
+    components: Vec<Vec<Spans<'a>>>,
     title: &'a str,
 ) -> (Paragraph<'a>, Paragraph<'a>) {
     let (labels_spans, values_spans) = components_to_label_and_value_spans(components);

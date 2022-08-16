@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -12,7 +12,7 @@ fn format(fees_as_a_percent_of_reward_for_last_2016_blocks: f64) -> String {
 
 pub fn fees_as_a_percent_of_reward_for_last_2016_blocks_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let fees_as_a_percent_of_reward_for_last_2016_blocks = match initialized_data
         .stats
         .fees_as_a_percent_of_reward_for_last_2016_blocks

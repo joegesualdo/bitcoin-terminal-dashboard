@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -13,7 +13,7 @@ fn format(average_fees_per_block_over_last_2016_blocks: u64) -> String {
 
 pub fn average_fees_per_block_over_last_2016_blocks_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let average_fees_per_block_over_last_2016_blocks = match initialized_data
         .stats
         .average_fees_per_block_over_last_2016_blocks

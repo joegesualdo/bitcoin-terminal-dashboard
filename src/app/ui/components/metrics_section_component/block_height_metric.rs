@@ -1,10 +1,10 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
 use crate::utils::format_number;
 
-pub fn block_height_metric_component<'a>(initialized_data: &'a InitializedData) -> Vec<Span> {
+pub fn block_height_metric_component<'a>(initialized_data: &'a InitializedData) -> Vec<Spans> {
     let block_height = match initialized_data.stats.block_height {
         FetchStatus::Complete(block_height) => format_number(block_height),
         FetchStatus::NotStarted => "Not Started...".to_string(),

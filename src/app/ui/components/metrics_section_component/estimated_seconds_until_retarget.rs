@@ -1,5 +1,5 @@
 use chrono::{Duration, Local, Utc};
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -7,7 +7,7 @@ use crate::utils::format_float_number;
 
 pub fn estimated_seconds_until_retarget_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let estimated_seconds_until_retarget =
         match initialized_data.stats.estimated_seconds_until_retarget {
             FetchStatus::Complete(estimated_seconds_until_retarget) => {

@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -14,7 +14,7 @@ fn format(hash_rate: f64) -> String {
 
 pub fn estimated_hash_rate_per_second_for_last_2016_blocks_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let estimated_hash_rate_per_second_for_last_2016_blocks = match initialized_data
         .stats
         .estimated_hash_rate_per_second_for_last_2016_blocks

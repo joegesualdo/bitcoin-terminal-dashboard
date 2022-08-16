@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -6,7 +6,7 @@ use crate::utils::format_duration;
 
 pub fn average_block_time_since_last_difficulty_adjustement_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let average_block_time_since_last_difficulty_adjustement = match initialized_data
         .stats
         .average_block_time_since_last_difficulty_adjustement

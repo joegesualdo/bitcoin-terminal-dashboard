@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -6,7 +6,7 @@ use crate::utils::format_number;
 
 pub fn blocks_mined_over_last_24_hours_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let blocks_mined_over_last_24_hours =
         match initialized_data.stats.blocks_mined_over_last_24_hours {
             FetchStatus::Complete(blocks_mined_over_last_24_hours) => {

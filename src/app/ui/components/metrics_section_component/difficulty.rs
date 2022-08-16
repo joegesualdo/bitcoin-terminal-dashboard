@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -12,7 +12,7 @@ fn format(difficulty: f64) -> String {
     let formated_difficulty = format_float_number(rounded);
     format!("{} T", formated_difficulty)
 }
-pub fn difficulty_component<'a>(initialized_data: &'a InitializedData) -> Vec<Span> {
+pub fn difficulty_component<'a>(initialized_data: &'a InitializedData) -> Vec<Spans> {
     let difficulty = match initialized_data.stats.difficulty {
         FetchStatus::Complete(difficulty) => format(difficulty),
         FetchStatus::NotStarted => "Not Started...".to_string(),

@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -10,7 +10,7 @@ fn format_price(price: f64) -> String {
     format!("${}", price_formatted)
 }
 
-pub fn bitcoin_price_component<'a>(initialized_data: &'a InitializedData) -> Vec<Span> {
+pub fn bitcoin_price_component<'a>(initialized_data: &'a InitializedData) -> Vec<Spans> {
     let bitcoin_price = match initialized_data.stats.bitcoin_price {
         FetchStatus::Complete(bitcoin_price) => format_price(bitcoin_price),
         FetchStatus::NotStarted => "Not Started...".to_string(),

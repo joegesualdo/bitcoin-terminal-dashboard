@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -12,7 +12,7 @@ fn format(block_subsidy_of_most_recent_block: u64) -> String {
 
 pub fn block_subsidy_of_most_recent_block_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let block_subsidy_of_most_recent_block =
         match initialized_data.stats.block_subsidy_of_most_recent_block {
             FetchStatus::Complete(block_subsidy_of_most_recent_block) => {

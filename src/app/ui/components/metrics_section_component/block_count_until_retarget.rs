@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -11,7 +11,7 @@ fn format(block_count: f64) -> String {
 
 pub fn block_count_until_retarget_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let block_count_until_retarget = match initialized_data.stats.block_count_until_retarget {
         FetchStatus::Complete(block_count_until_retarget) => format(block_count_until_retarget),
         FetchStatus::NotStarted => "Not Started...".to_string(),

@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -6,7 +6,7 @@ use crate::utils::format_number;
 
 pub fn new_transactions_count_over_last_30_days_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let transactions_count_over_last_30_days =
         match initialized_data.stats.transactions_count_over_last_30_days {
             FetchStatus::Complete(transactions_count_over_last_30_days) => {

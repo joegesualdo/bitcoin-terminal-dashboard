@@ -1,10 +1,10 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
 use crate::utils::{format_float_number, format_number, round};
 
-pub fn chain_size_metric_component<'a>(initialized_data: &'a InitializedData) -> Vec<Span> {
+pub fn chain_size_metric_component<'a>(initialized_data: &'a InitializedData) -> Vec<Spans> {
     let chain_size = match initialized_data.stats.chain_size {
         FetchStatus::Complete(chain_size) => {
             let chain_size_in_gigabytes = chain_size as f64 / 1_000_000_000.0;

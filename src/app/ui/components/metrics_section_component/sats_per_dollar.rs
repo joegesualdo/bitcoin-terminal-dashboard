@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -14,7 +14,7 @@ fn get_sats_per_dollar_format_for_bitcoin_price(bitcoin_price: f64) -> String {
     format_float_number(rounded)
 }
 
-pub fn sats_per_dollar_component<'a>(initialized_data: &'a InitializedData) -> Vec<Span> {
+pub fn sats_per_dollar_component<'a>(initialized_data: &'a InitializedData) -> Vec<Spans> {
     let sats_per_dollar = match initialized_data.stats.bitcoin_price {
         FetchStatus::Complete(bitcoin_price) => {
             get_sats_per_dollar_format_for_bitcoin_price(bitcoin_price)

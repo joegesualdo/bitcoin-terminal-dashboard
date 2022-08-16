@@ -1,4 +1,4 @@
-use tui::text::Span;
+use tui::text::{Span, Spans};
 
 use super::metrics_line_component::metric_line_component;
 use crate::app::state::{FetchStatus, InitializedData};
@@ -12,7 +12,7 @@ fn format_fees(total_fees_for_last_24_hours: u64) -> String {
 }
 pub fn total_fees_for_last_24_hours_component<'a>(
     initialized_data: &'a InitializedData,
-) -> Vec<Span> {
+) -> Vec<Spans> {
     let total_fees_for_last_24_hours = match initialized_data.stats.total_fees_for_last_24_hours {
         FetchStatus::Complete(total_fees_for_last_24_hours) => {
             format_fees(total_fees_for_last_24_hours)
