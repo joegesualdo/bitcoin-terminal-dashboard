@@ -9,14 +9,25 @@ This library provides helpful functions to query common information about the bi
 
 ## Install
 > Add package to Cargo.toml file
-```rust
-[dependencies]
-bitcoin-node-query = "0.1.2"
+```bash
+$ cargo install bitcoin-terminal-dashboard
 ```
 
-## Usage:
+## Setup:
+> Must have these environment variable set for the terminal to work. Could go in your `.zshrc` or `.bashrc`:
 ```
- BITCOIND_PASSWORD=<node_password>BITCOIND_USERNAME=<node_username> BITCOIND_URL=<node_url> cargo run
+export BITCOIND_PASSWORD="..." 
+export BITCOIND_USERNAME="..." 
+export BITCOIND_URL="127.0.0.1:8332"
+```
+## Usage
+``` bash
+ $ bitcoin-terminal-dashboard
+```
+
+> Could optionally pass the environment variable to the script:
+```
+ BITCOIND_PASSWORD=... BITCOIND_USERNAME=...BITCOIND_URL=... bitcoin-terminal-dashboard
 ```
 
 ## Related
