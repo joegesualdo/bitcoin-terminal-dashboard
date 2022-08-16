@@ -29,8 +29,23 @@ fn check_size(rect: &Rect) {
     }
 }
 
+const ASCII_ART: &str = r#"
+  ___ _ _          _         ___          _    
+ | _ |_) |_ __ ___(_)_ _    |   \ __ _ __| |_  
+ | _ \ |  _/ _/ _ \ | ' \   | |) / _` (_-< ' \ 
+ |___/_|\__\__\___/_|_||_|  |___/\__,_/__/_||_|
+"#;
+const ASCII_ART_2: &str = r#"
+  ____ _______ _____   _____           _____ _    _ 
+ |  _ \__   __/ ____| |  __ \   /\    / ____| |  | |
+ | |_) | | | | |      | |  | | /  \  | (___ | |__| |
+ |  _ <  | | | |      | |  | |/ /\ \  \___ \|  __  |
+ | |_) | | | | |____  | |__| / ____ \ ____) | |  | |
+ |____/  |_|  \_____| |_____/_/    \_\_____/|_|  |_|
+"#;
+
 fn title_component<'a>() -> Paragraph<'a> {
-    Paragraph::new("Bitcoin Terminal Dashboard")
+    Paragraph::new(ASCII_ART.replacen("\n", "", 1))
         .style(Style::default().fg(BITCOIN_ORANGE_COLOR))
         .alignment(Alignment::Center)
         .block(
@@ -91,7 +106,7 @@ where
 
     let app_chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Length(3), Constraint::Min(10)].as_ref())
+        .constraints([Constraint::Length(7), Constraint::Min(10)].as_ref())
         .split(size);
 
     // Title
@@ -104,35 +119,6 @@ where
     // metrics
     rect.render_widget(metrics_block, metrics_chunks);
 
-    let market_data_block = Block::default()
-        .borders(Borders::ALL)
-        .title("Market Data")
-        .border_type(BorderType::Rounded);
-    let blockchain_data = Block::default()
-        .borders(Borders::ALL)
-        .title("Blockchain data")
-        .border_type(BorderType::Rounded);
-    let mining_data = Block::default()
-        .borders(Borders::ALL)
-        .title("Mining data")
-        .border_type(BorderType::Rounded);
-    let difficulty_data = Block::default()
-        .borders(Borders::ALL)
-        .title("Difficulty data")
-        .border_type(BorderType::Rounded);
-    let random_data = Block::default()
-        .borders(Borders::ALL)
-        .title("Random data")
-        .border_type(BorderType::Rounded);
-
-    //let metric_blocks = vec![
-    //    market_data_block,
-    //    blockchain_data,
-    //    mining_data,
-    //    difficulty_data,
-    //    random_data,
-    //];
-
     let metric_blocks = match app.state() {
         AppState::Init => vec![],
         AppState::Initialized(initialized_data) => {
@@ -142,6 +128,8 @@ where
                 transactions_data_component(initialized_data, app.state()),
                 difficulty_data_component(initialized_data, app.state()),
                 mining_data_component(initialized_data, app.state()),
+                market_data_component(&initialized_data, app.state()),
+                difficulty_data_component(initialized_data, app.state()),
             ]
         }
     };

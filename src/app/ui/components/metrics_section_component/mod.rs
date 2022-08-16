@@ -84,11 +84,13 @@ fn components_to_key_value_paragraphs<'a>(
 
     let market_data_block_1 = Block::default()
         .borders(Borders::ALL)
+        .border_style(Style::default().fg(Color::Cyan))
         .title(title.clone())
         .border_type(BorderType::Rounded);
 
     let market_data_block_2 = Block::default()
         .borders(Borders::ALL)
+        .border_style(Style::default().fg(Color::Cyan))
         .title(title.clone())
         .border_type(BorderType::Rounded);
 
@@ -113,7 +115,7 @@ pub fn market_data_component<'a>(
             bitcoin_price_component(initialized_data),
             sats_per_dollar_component(initialized_data),
         ],
-        "Market Data",
+        "Market 📈 ",
     )
 }
 
@@ -130,7 +132,7 @@ pub fn blockchain_data_component<'a>(
             chain_size_metric_component(initialized_data),
             utxo_set_size_component(initialized_data),
         ],
-        "Blockchain Data",
+        "Blockchain ⛓️  ",
     )
 }
 
@@ -144,7 +146,7 @@ pub fn transactions_data_component<'a>(
             tps_for_last_30_days_component(initialized_data),
             total_fees_for_last_24_hours_component(initialized_data),
         ],
-        "Transactions Data",
+        "Transactions 🖊️ ",
     )
 }
 pub fn difficulty_data_component<'a>(
@@ -159,7 +161,7 @@ pub fn difficulty_data_component<'a>(
             estimated_seconds_until_retarget_component(initialized_data),
             average_block_time_since_last_difficulty_adjustement_component(initialized_data),
         ],
-        "Difficulty Data",
+        "Difficulty ⚙️  ",
     )
 }
 
@@ -177,6 +179,6 @@ pub fn mining_data_component<'a>(
             fees_as_a_percent_of_reward_for_last_2016_blocks_component(initialized_data),
             fees_as_a_percent_of_reward_for_last_24_hours_component(initialized_data),
         ],
-        "Mining Data",
+        "Mining ⚒️  ",
     )
 }
