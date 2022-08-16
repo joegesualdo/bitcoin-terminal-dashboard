@@ -70,8 +70,8 @@ fn help_section_component(actions: &Actions) -> Table {
                 .border_type(BorderType::Plain)
                 .title("Help"),
         )
-        .widths(&[Constraint::Length(11), Constraint::Min(20)])
-        .column_spacing(1)
+        .widths(&[Constraint::Percentage(90), Constraint::Max(10)])
+        .column_spacing(0)
 }
 
 pub fn draw<B>(rect: &mut Frame<B>, app: &App)
@@ -98,19 +98,11 @@ where
     let title_component = title_component();
     rect.render_widget(title_component, app_chunks[0]);
 
-    // Body: metrics & Help
-    let body_chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(80), Constraint::Percentage(20)].as_ref())
-        .split(app_chunks[1]);
-
-    //let body_component = body_component(false, app.state());
+    let metrics_chunks = app_chunks[1];
     //
-    let metrics_chunk = body_chunks[0];
-    let help_chunk = body_chunks[1];
 
     // metrics
-    rect.render_widget(metrics_block, body_chunks[0]);
+    rect.render_widget(metrics_block, metrics_chunks);
 
     let market_data_block = Block::default()
         .borders(Borders::ALL)
@@ -155,7 +147,7 @@ where
     };
 
     let is_small_screen = size.width < 200;
-    let max_columns_count = 3;
+    let max_columns_count = 5;
     let horizontal_metrics_chunks_count_per_vertical_chunk = if is_small_screen {
         1
     } else {
@@ -165,10 +157,8 @@ where
     let vertical_metrics_chunks_count = if is_small_screen {
         metric_blocks.len()
     } else {
-        let a = (metric_blocks.len() as f64
-            / horizontal_metrics_chunks_count_per_vertical_chunk as f64)
-            .ceil() as usize;
-        a
+        (metric_blocks.len() as f64 / horizontal_metrics_chunks_count_per_vertical_chunk as f64)
+            .ceil() as usize
     };
 
     let metric_box_width_percent = if is_small_screen {
@@ -177,9 +167,9 @@ where
         100.0 / horizontal_metrics_chunks_count_per_vertical_chunk as f64
     };
     let metric_box_height_percent = if is_small_screen {
-        (100.0 / vertical_metrics_chunks_count as f64).floor()
+        (100.0 / vertical_metrics_chunks_count as f64)
     } else {
-        (100.0 / vertical_metrics_chunks_count as f64).floor()
+        (100.0 / vertical_metrics_chunks_count as f64)
     };
 
     let vertical_constraints = vec![
@@ -188,9 +178,9 @@ where
     ];
     let vertical_metrics_chunks = Layout::default()
         .direction(Direction::Vertical)
-        .margin(1)
         .constraints(vertical_constraints.as_ref())
-        .split(metrics_chunk);
+        .margin(1)
+        .split(metrics_chunks);
 
     vertical_metrics_chunks.iter().enumerate().for_each(
         |(vertical_metrics_chunk_index, vertical_metric_chunk)| {
@@ -211,15 +201,18 @@ where
                         * horizontal_metrics_chunks_count_per_vertical_chunk)
                         + i;
                     if (index_of_metric_blocks < (metric_blocks.len())) {
+                        let (metric_block_label, metric_block_value) =
+                            metric_blocks[index_of_metric_blocks].clone();
                         rect.render_widget(
-                            metric_blocks[index_of_metric_blocks].clone(),
+                            metric_block_label,
                             horizontal_metrics_chunks[i].clone(),
-                        )
+                        );
+                        rect.render_widget(metric_block_value, horizontal_metrics_chunks[i].clone())
                     }
                 })
         },
     );
 
-    let help_section_component = help_section_component(app.actions());
-    rect.render_widget(help_section_component, body_chunks[1]);
+    //let help_section_component = help_section_component(app.actions());
+    //rect.render_widget(help_section_component, body_chunks[1]);
 }

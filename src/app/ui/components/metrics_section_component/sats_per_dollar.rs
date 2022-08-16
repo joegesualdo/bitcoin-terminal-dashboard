@@ -22,7 +22,7 @@ pub fn sats_per_dollar_component<'a>(initialized_data: &'a InitializedData) -> V
         FetchStatus::NotStarted => "Not Started...".to_string(),
         FetchStatus::InProgress(maybe_old_value) => match maybe_old_value {
             Some(old_value) => format!(
-                "{} (loading...)",
+                "↻ {}",
                 get_sats_per_dollar_format_for_bitcoin_price(old_value)
             ),
             None => "Loading...".to_string(),

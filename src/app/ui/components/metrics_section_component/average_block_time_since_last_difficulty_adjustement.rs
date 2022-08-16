@@ -23,7 +23,7 @@ pub fn average_block_time_since_last_difficulty_adjustement_component<'a>(
     let average_block_time_since_last_difficulty_adjustement_text =
         format!("{}", average_block_time_since_last_difficulty_adjustement);
     let average_block_time_since_last_difficulty_adjustement_spans = metric_line_component(
-        "Average Block Time Since Last Difficulty Adjustment",
+        "Average Block Time (current epoch)",
         average_block_time_since_last_difficulty_adjustement,
     );
     average_block_time_since_last_difficulty_adjustement_spans

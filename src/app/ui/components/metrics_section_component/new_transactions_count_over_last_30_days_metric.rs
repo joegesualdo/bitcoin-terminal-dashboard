@@ -21,7 +21,7 @@ pub fn new_transactions_count_over_last_30_days_component<'a>(
     let transactions_count_over_last_30_days_block_text =
         format!("{}", transactions_count_over_last_30_days);
     let transactions_count_over_last_30_days_block_spans = metric_line_component(
-        "Transactions count over the last 30 days",
+        "Transactions count (30 days)",
         transactions_count_over_last_30_days,
     );
     transactions_count_over_last_30_days_block_spans

@@ -75,7 +75,7 @@ fn start_loop_for_fetching_bitcoin_price(events: &Events) {
             .send(InputEvent::FetchResource(Resource::BitcoinPrice(
                 FetchEvent::Complete(bitcoin_price),
             )));
-        sleep(Duration::from_secs(60));
+        sleep(Duration::from_secs(30));
     });
 }
 fn start_loop_for_fetching_new_block_height(events: &Events) {

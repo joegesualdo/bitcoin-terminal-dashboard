@@ -6,7 +6,8 @@ use crate::utils::{format_duration, format_float_number, round};
 
 fn format_price(price: f64) -> String {
     let rounded_price = round(price, 2);
-    format_float_number(rounded_price)
+    let price_formatted = format_float_number(rounded_price);
+    format!("${}", price_formatted)
 }
 
 pub fn bitcoin_price_component<'a>(initialized_data: &'a InitializedData) -> Vec<Span> {
@@ -14,7 +15,7 @@ pub fn bitcoin_price_component<'a>(initialized_data: &'a InitializedData) -> Vec
         FetchStatus::Complete(bitcoin_price) => format_price(bitcoin_price),
         FetchStatus::NotStarted => "Not Started...".to_string(),
         FetchStatus::InProgress(maybe_old_value) => match maybe_old_value {
-            Some(old_value) => format!("{} (loading...)", format_price(old_value)),
+            Some(old_value) => format!("↻ {}", format_price(old_value)),
             None => "Loading...".to_string(),
         },
     };
