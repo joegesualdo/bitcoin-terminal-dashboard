@@ -1,3 +1,5 @@
+use std::u16::MAX;
+
 use tui::backend::Backend;
 use tui::layout::{Alignment, Constraint, Direction, Layout};
 use tui::style::{Color, Style};
@@ -58,7 +60,8 @@ where
         .title("Metrics")
         .border_type(BorderType::Rounded);
 
-    let metric_blocks = match app.state() {
+    //
+    let metric_sections_uis = match app.state() {
         AppState::Init => vec![],
         AppState::Initialized(initialized_data) => {
             vec![
@@ -67,42 +70,68 @@ where
                 transactions_data_component(initialized_data, app.state()),
                 difficulty_data_component(initialized_data, app.state()),
                 mining_data_component(initialized_data, app.state()),
-                market_data_component(&initialized_data, app.state()),
-                difficulty_data_component(initialized_data, app.state()),
             ]
         }
     };
 
-    let is_small_screen = size.width < 200;
-    let max_columns_count = 5;
-    let horizontal_metrics_chunks_count_per_vertical_chunk = if is_small_screen {
-        1
-    } else {
-        max_columns_count
+    type Width = u16;
+    enum ScreenWidth {
+        XSmall(Width),
+        Small(Width),
+        Medium(Width),
+        Large(Width),
+        XLarge(Width),
+    }
+
+    let screen_width = match size.width {
+        width @ 0..=100 => ScreenWidth::XSmall(width),
+        width @ 101..=150 => ScreenWidth::Small(width),
+        width @ 151..=200 => ScreenWidth::Medium(width),
+        width @ 201..=250 => ScreenWidth::Large(width),
+        width @ 251..=MAX => ScreenWidth::XLarge(width),
     };
 
-    let vertical_metrics_chunks_count = if is_small_screen {
-        metric_blocks.len()
-    } else {
-        (metric_blocks.len() as f64 / horizontal_metrics_chunks_count_per_vertical_chunk as f64)
-            .ceil() as usize
+    let columns_count = match screen_width {
+        ScreenWidth::XSmall(_width) => 1,
+        ScreenWidth::Small(_width) => 2,
+        ScreenWidth::Medium(_width) => 3,
+        ScreenWidth::Large(_width) => 4,
+        ScreenWidth::XLarge(_width) => 5,
     };
 
-    let metric_box_width_percent = if is_small_screen {
-        100.0
-    } else {
-        100.0 / horizontal_metrics_chunks_count_per_vertical_chunk as f64
-    };
-    let metric_box_height_percent = if is_small_screen {
-        100.0 / vertical_metrics_chunks_count as f64
-    } else {
-        100.0 / vertical_metrics_chunks_count as f64
+    let horizontal_metrics_chunks_count_per_vertical_chunk = columns_count;
+
+    let minimum_number_of_rows_required =
+        (metric_sections_uis.len() as f64 / columns_count as f64).ceil() as usize;
+
+    let vertical_metrics_chunks_count = match screen_width {
+        ScreenWidth::XSmall(_width) => metric_sections_uis.len(),
+        ScreenWidth::Small(_width) => minimum_number_of_rows_required,
+        ScreenWidth::Medium(_width) => minimum_number_of_rows_required,
+        ScreenWidth::Large(_width) => minimum_number_of_rows_required,
+        ScreenWidth::XLarge(_width) => minimum_number_of_rows_required,
     };
 
-    let vertical_constraints = vec![
-        Constraint::Percentage(metric_box_height_percent as u16);
-        vertical_metrics_chunks_count
-    ];
+    let width_per_box = 100.0 / horizontal_metrics_chunks_count_per_vertical_chunk as f64;
+
+    let metric_box_width_percent = match screen_width {
+        ScreenWidth::XSmall(_width) => 100.0,
+        ScreenWidth::Small(_width) => width_per_box,
+        ScreenWidth::Medium(_width) => width_per_box,
+        ScreenWidth::Large(_width) => width_per_box,
+        ScreenWidth::XLarge(_width) => width_per_box,
+    };
+    let height_per_box = 100.0 / vertical_metrics_chunks_count as f64;
+
+    let metric_box_height_constraint: Constraint = match screen_width {
+        ScreenWidth::XSmall(_width) => Constraint::Percentage(height_per_box as u16),
+        ScreenWidth::Small(_width) => Constraint::Percentage(height_per_box as u16),
+        ScreenWidth::Medium(_width) => Constraint::Percentage(height_per_box as u16),
+        ScreenWidth::Large(_width) => Constraint::Percentage(height_per_box as u16),
+        ScreenWidth::XLarge(_width) => Constraint::Percentage(height_per_box as u16),
+    };
+
+    let vertical_constraints = vec![metric_box_height_constraint; vertical_metrics_chunks_count];
     let vertical_metrics_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints(vertical_constraints.as_ref())
@@ -130,10 +159,10 @@ where
                         * horizontal_metrics_chunks_count_per_vertical_chunk)
                         + i;
                     let has_iterated_over_all_metric_blocks: bool =
-                        index_of_metric_blocks < metric_blocks.len();
+                        index_of_metric_blocks < metric_sections_uis.len();
                     if has_iterated_over_all_metric_blocks {
                         let (metric_block_label, metric_block_value) =
-                            metric_blocks[index_of_metric_blocks].clone();
+                            metric_sections_uis[index_of_metric_blocks].clone();
                         rect.render_widget(
                             metric_block_label,
                             horizontal_metrics_chunks[i].clone(),
