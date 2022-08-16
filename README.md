@@ -4,3 +4,6 @@
 ```
  BITCOIND_PASSWORD=<node_password>BITCOIND_USERNAME=<node_username> cargo run
 ```
+
+![Screenshot](screenshot.png)
+

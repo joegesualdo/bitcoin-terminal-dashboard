@@ -30,7 +30,7 @@ fn title_component<'a>() -> Paragraph<'a> {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .style(Style::default().fg(Color::Blue))
+                .style(Style::default().fg(Color::Cyan))
                 .border_type(BorderType::Rounded),
         )
 }
@@ -65,11 +65,11 @@ where
         AppState::Init => vec![],
         AppState::Initialized(initialized_data) => {
             vec![
-                market_data_component(&initialized_data, app.state()),
-                blockchain_data_component(&initialized_data, app.state()),
-                transactions_data_component(initialized_data, app.state()),
-                difficulty_data_component(initialized_data, app.state()),
-                mining_data_component(initialized_data, app.state()),
+                market_data_component(&initialized_data),
+                blockchain_data_component(&initialized_data),
+                transactions_data_component(initialized_data),
+                difficulty_data_component(initialized_data),
+                mining_data_component(initialized_data),
             ]
         }
     };

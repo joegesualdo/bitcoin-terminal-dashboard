@@ -1,20 +1,15 @@
 use tui::text::{Span, Spans};
 
-use super::metrics_line_component::metric_line_component;
-use crate::app::state::{FetchStatus, InitializedData};
+use super::metric_line_fetch_status_component;
+use crate::app::state::InitializedData;
 use crate::utils::format_number;
 
 pub fn total_transactions_count_component<'a>(initialized_data: &'a InitializedData) -> Vec<Spans> {
-    let total_transactions_count = match initialized_data.stats.total_transactions_count {
-        FetchStatus::Complete(total_transactions_count) => format_number(total_transactions_count),
-        FetchStatus::NotStarted => "Not Started...".to_string(),
-        FetchStatus::InProgress(maybe_old_value) => match maybe_old_value {
-            Some(old_value) => format!("{} (loading...)", old_value),
-            None => "Loading...".to_string(),
+    metric_line_fetch_status_component(
+        "Total Transactions ",
+        &initialized_data.stats.total_transactions_count,
+        |total_transactions_count: &u64| -> String {
+            format_number(total_transactions_count.clone())
         },
-    };
-    let total_transactions_count_text = format!("{}", total_transactions_count);
-    let total_transactions_count_spans =
-        metric_line_component("Total Transaction Count", total_transactions_count_text);
-    total_transactions_count_spans
+    )
 }

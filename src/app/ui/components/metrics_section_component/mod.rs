@@ -1,10 +1,7 @@
-use bitcoin_node_query::get_estimated_hash_rate_per_second_for_block_since_last_difficulty_change;
-use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
-use tui::style::{Color, Modifier, Style};
-use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, Cell, Paragraph, Row, Table};
-use tui::Frame;
+use tui::layout::Alignment;
+use tui::style::{Color, Style};
+use tui::text::Spans;
+use tui::widgets::{Block, BorderType, Borders, Paragraph};
 
 mod average_block_time_for_last_2016_blocks;
 mod average_block_time_since_last_difficulty_adjustement;
@@ -49,7 +46,6 @@ use self::estimated_hash_rate_per_second_for_last_2016_blocks::estimated_hash_ra
 use self::estimated_seconds_until_retarget::estimated_seconds_until_retarget_component;
 use self::fees_as_a_percent_of_reward_for_last_2016_blocks::fees_as_a_percent_of_reward_for_last_2016_blocks_component;
 use self::fees_as_a_percent_of_reward_for_last_24_hours::fees_as_a_percent_of_reward_for_last_24_hours_component;
-use self::header_component::metric_section_header_component;
 use self::metrics_line_component::metric_line_component;
 use self::new_transactions_count_over_last_30_days_metric::new_transactions_count_over_last_30_days_component;
 use self::sats_per_dollar::sats_per_dollar_component;
@@ -58,10 +54,7 @@ use self::total_fees_for_last_24_hours::total_fees_for_last_24_hours_component;
 use self::total_transaction_count::total_transactions_count_component;
 use self::tps_for_last_30_days::tps_for_last_30_days_component;
 use self::utxo_set_size::utxo_set_size_component;
-use crate::app::state::{AppState, FetchStatus, InitializedData};
-use crate::app::ui::BITCOIN_ORANGE_COLOR;
-use crate::app::App;
-use crate::utils::{format_duration, format_number, format_number_string};
+use crate::app::state::{FetchStatus, InitializedData};
 
 fn components_to_label_and_value_spans<'a>(
     components: Vec<Vec<Spans<'a>>>,
@@ -85,12 +78,13 @@ fn components_to_key_value_paragraphs<'a>(
     let market_data_block_1 = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::default().fg(Color::Cyan))
-        .title(title.clone())
+        .title_alignment(Alignment::Center)
         .border_type(BorderType::Rounded);
 
     let market_data_block_2 = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::default().fg(Color::Cyan))
+        .title_alignment(Alignment::Center)
         .title(title.clone())
         .border_type(BorderType::Rounded);
 
@@ -106,22 +100,41 @@ fn components_to_key_value_paragraphs<'a>(
     return (label_paragraph, value_paragraph);
 }
 
+pub fn metric_line_fetch_status_component<'a, T, U>(
+    label: &'a str,
+    data_to_be_fetched: &'a FetchStatus<T>,
+    format: U,
+) -> Vec<Spans<'a>>
+where
+    U: Fn(&T) -> String,
+{
+    let data: String = match data_to_be_fetched {
+        FetchStatus::Complete(data) => format(data),
+        FetchStatus::NotStarted => "---".to_string(),
+        FetchStatus::InProgress(maybe_old_value) => match maybe_old_value {
+            Some(old_value) => format!("↻ {}", format(old_value)),
+            None => "🔄".to_string(),
+        },
+    };
+    let data_text = format!("{}", data);
+    let data_spans = metric_line_component(label, data_text);
+    data_spans
+}
+
 pub fn market_data_component<'a>(
     initialized_data: &'a InitializedData,
-    state: &'a AppState,
 ) -> (Paragraph<'a>, Paragraph<'a>) {
     components_to_key_value_paragraphs(
         vec![
             bitcoin_price_component(initialized_data),
             sats_per_dollar_component(initialized_data),
         ],
-        "Market 📈 ",
+        " Market 📈 ",
     )
 }
 
 pub fn blockchain_data_component<'a>(
     initialized_data: &'a InitializedData,
-    state: &'a AppState,
 ) -> (Paragraph<'a>, Paragraph<'a>) {
     components_to_key_value_paragraphs(
         vec![
@@ -132,13 +145,12 @@ pub fn blockchain_data_component<'a>(
             chain_size_metric_component(initialized_data),
             utxo_set_size_component(initialized_data),
         ],
-        "Blockchain ⛓️  ",
+        " Blockchain ⛓️  ",
     )
 }
 
 pub fn transactions_data_component<'a>(
     initialized_data: &'a InitializedData,
-    state: &'a AppState,
 ) -> (Paragraph<'a>, Paragraph<'a>) {
     components_to_key_value_paragraphs(
         vec![
@@ -146,12 +158,11 @@ pub fn transactions_data_component<'a>(
             tps_for_last_30_days_component(initialized_data),
             total_fees_for_last_24_hours_component(initialized_data),
         ],
-        "Transactions 🖊️ ",
+        " Transactions 🖊️ ",
     )
 }
 pub fn difficulty_data_component<'a>(
     initialized_data: &'a InitializedData,
-    state: &'a AppState,
 ) -> (Paragraph<'a>, Paragraph<'a>) {
     components_to_key_value_paragraphs(
         vec![
@@ -161,13 +172,12 @@ pub fn difficulty_data_component<'a>(
             estimated_seconds_until_retarget_component(initialized_data),
             average_block_time_since_last_difficulty_adjustement_component(initialized_data),
         ],
-        "Difficulty ⚙️  ",
+        " Difficulty ⚙️  ",
     )
 }
 
 pub fn mining_data_component<'a>(
     initialized_data: &'a InitializedData,
-    state: &'a AppState,
 ) -> (Paragraph<'a>, Paragraph<'a>) {
     components_to_key_value_paragraphs(
         vec![
@@ -176,9 +186,9 @@ pub fn mining_data_component<'a>(
             blocks_mined_over_last_24_hours_component(initialized_data),
             average_fees_per_block_over_last_24_hours_component(initialized_data),
             average_fees_per_block_over_last_2016_blocks_component(initialized_data),
-            fees_as_a_percent_of_reward_for_last_2016_blocks_component(initialized_data),
             fees_as_a_percent_of_reward_for_last_24_hours_component(initialized_data),
+            fees_as_a_percent_of_reward_for_last_2016_blocks_component(initialized_data),
         ],
-        "Mining ⚒️  ",
+        " Mining ⚒️  ",
     )
 }
