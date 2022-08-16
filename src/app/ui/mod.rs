@@ -37,29 +37,26 @@ pub fn draw<B>(rect: &mut Frame<B>, app: &App)
 where
     B: Backend,
 {
+    // Get Size of Terminal
     let size = rect.size();
 
-    // Vertical layout
-    // Surrounding block
-    let metrics_block = Block::default()
-        .borders(Borders::ALL)
-        .title("Metrics")
-        .border_type(BorderType::Rounded);
-
+    // Split terminal into title section and metrics section
     let app_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Length(7), Constraint::Min(10)].as_ref())
         .split(size);
 
-    // Title
+    let title_chunk = app_chunks[0];
+    let metrics_chunk = app_chunks[1];
+
+    // Render Title
     let title_component = title_component();
-    rect.render_widget(title_component, app_chunks[0]);
 
-    let metrics_chunks = app_chunks[1];
-    //
-
-    // metrics
-    rect.render_widget(metrics_block, metrics_chunks);
+    // Create wrapper Box for Metrics chunk, with stylings
+    let metrics_block = Block::default()
+        .borders(Borders::ALL)
+        .title("Metrics")
+        .border_type(BorderType::Rounded);
 
     let metric_blocks = match app.state() {
         AppState::Init => vec![],
@@ -110,8 +107,12 @@ where
         .direction(Direction::Vertical)
         .constraints(vertical_constraints.as_ref())
         .margin(1)
-        .split(metrics_chunks);
+        .split(metrics_chunk);
 
+    // RENDER ==================================================================
+    rect.render_widget(title_component, title_chunk);
+    rect.render_widget(metrics_block, metrics_chunk);
+    // rener each metric box
     vertical_metrics_chunks.iter().enumerate().for_each(
         |(vertical_metrics_chunk_index, vertical_metric_chunk)| {
             let horizontal_constraints =
