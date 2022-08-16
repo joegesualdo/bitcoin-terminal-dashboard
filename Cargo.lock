@@ -132,9 +132,9 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
 name = "bitcoin-node-query"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14355e0e938190e5dcc3cfa28bdd3b356f3c646e4cf01deae0c3874fc7d860fc"
+checksum = "c79db36a9d0c63d01bd851169dffbb449025185c9eb12ce169c33eaeccf8f9de"
 dependencies = [
  "bitcoind-request",
  "chrono",
@@ -171,9 +171,9 @@ dependencies = [
 
 [[package]]
 name = "bitcoind-request"
-version = "0.1.3"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "832c65f4eaaa22b01197f200a2a05fdf72737c0954d5fef1efe63bb9eb11239d"
+checksum = "dd415b99b7336dbd3cda283c029923d3f0a8364cb91f8604b5059a73951d02b8"
 dependencies = [
  "async-std",
  "chrono",
@@ -722,9 +722,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.131"
+version = "0.2.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04c3b4822ccebfa39c02fc03d1534441b22ead323fa0f48bb7ddd8e6ba076a40"
+checksum = "8371e4e5341c3a96db127eb2465ac681ced4c433e01dd0e938adbef26ba93ba5"
 
 [[package]]
 name = "lock_api"

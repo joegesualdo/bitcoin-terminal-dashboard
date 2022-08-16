@@ -6,14 +6,11 @@ use std::thread::{self, sleep};
 use std::time::Duration;
 mod utils;
 
-use app::state::FetchStatus;
 use app::{App, AppReturn};
-use bitcoin_node_query;
+use bitcoin_node_query::{self, Client};
 use eyre::Result;
 use inputs::events::Events;
 use inputs::{FetchEvent, InputEvent, Resource};
-use jsonrpc::simple_http::{self, SimpleHttpTransport};
-use jsonrpc::Client;
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
 
@@ -22,17 +19,11 @@ use crate::app::ui;
 pub mod app;
 pub mod inputs;
 
-fn client(url: &str, user: &str, pass: &str) -> Result<Client, simple_http::Error> {
-    let t = SimpleHttpTransport::builder()
-        .url(url)?
-        .auth(user, Some(pass))
-        .build();
-    Ok(Client::with_transport(t))
-}
 fn get_client() -> Client {
     let password = env::var("BITCOIND_PASSWORD").expect("BITCOIND_PASSWORD env variable not set");
     let username = env::var("BITCOIND_USERNAME").expect("BITCOIND_USERNAME env variable not set");
-    let client = client("127.0.0.1:8332", &username, &password).expect("failed to create client");
+    let url = env::var("BITCOIND_URL").expect("BITCOIND_URL env variable not set");
+    let client = Client::new(&url, &username, &password).expect("failed to create client");
     client
 }
 
