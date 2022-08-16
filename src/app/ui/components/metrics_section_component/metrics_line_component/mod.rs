@@ -5,7 +5,10 @@ use crate::app::ui::BITCOIN_ORANGE_COLOR;
 
 fn metric_name_component<'a>(metric_name: &'a str) -> Span<'a> {
     let metric_name_span = Span::styled(
-        format!("{}: ", metric_name),
+        format!(
+            "{}...................................................................",
+            metric_name
+        ),
         Style::default().fg(Color::White),
     );
     metric_name_span
