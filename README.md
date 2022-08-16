@@ -9,24 +9,24 @@ This library provides helpful functions to query common information about the bi
 
 ## Install
 > Add package to Cargo.toml file
-```bash
+```shell
 $ cargo install bitcoin-terminal-dashboard
 ```
 
 ## Setup:
 > Must have these environment variable set for the terminal to work. Could go in your `.zshrc` or `.bashrc`:
-```
+```shell
 export BITCOIND_PASSWORD="..." 
 export BITCOIND_USERNAME="..." 
 export BITCOIND_URL="127.0.0.1:8332"
 ```
 ## Usage
-``` bash
+```shell
  $ bitcoin-terminal-dashboard
 ```
 
 > Could optionally pass the environment variable to the script:
-```
+```shell
  BITCOIND_PASSWORD=... BITCOIND_USERNAME=...BITCOIND_URL=... bitcoin-terminal-dashboard
 ```
 
