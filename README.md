@@ -1,3 +1,5 @@
+![Screenshot](logo.png)
+
 ☠️⚠️ Work In Progress ⚠️☠️
 
 # Bitcoin Terminal Dashboard
