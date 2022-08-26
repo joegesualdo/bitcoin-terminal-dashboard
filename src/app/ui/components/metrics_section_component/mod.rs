@@ -55,6 +55,7 @@ use self::total_transaction_count::total_transactions_count_component;
 use self::tps_for_last_30_days::tps_for_last_30_days_component;
 use self::utxo_set_size::utxo_set_size_component;
 use crate::app::state::{FetchStatus, InitializedData};
+use crate::utils::{format_float_number, percent_string, round};
 
 fn components_to_label_and_value_spans<'a>(
     components: Vec<Vec<Spans<'a>>>,
@@ -157,6 +158,38 @@ pub fn transactions_data_component<'a>(
             total_transactions_count_component(initialized_data),
             tps_for_last_30_days_component(initialized_data),
             total_fees_for_last_24_hours_component(initialized_data),
+            metric_line_fetch_status_component(
+                "Segwit % (24h)",
+                &initialized_data.stats.segwit_percent_last_24_hours,
+                |segwit_percent_last_24_hours: &f64| -> String {
+                    let percent_string = percent_string(segwit_percent_last_24_hours.clone(), 2);
+                    format!("{}", percent_string)
+                },
+            ),
+            metric_line_fetch_status_component(
+                "Segwit Spending Payments % (24h)",
+                &initialized_data
+                    .stats
+                    .segwit_spending_payments_percent_last_24_hours,
+                |segwit_spending_payments_percent_last_24_hours: &f64| -> String {
+                    let percent_string =
+                        percent_string(segwit_spending_payments_percent_last_24_hours.clone(), 2);
+                    format!("{}", percent_string)
+                },
+            ),
+            metric_line_fetch_status_component(
+                "Segwit Spending Transactions % (24h)",
+                &initialized_data
+                    .stats
+                    .segwit_spending_transactions_percent_last_24_hours,
+                |segwit_spending_transactions_percent_last_24_hours: &f64| -> String {
+                    let percent_string = round(
+                        segwit_spending_transactions_percent_last_24_hours.clone(),
+                        2,
+                    );
+                    format!("{}", percent_string)
+                },
+            ),
         ],
         " Transactions 🖊️ ",
     )

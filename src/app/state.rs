@@ -36,6 +36,9 @@ pub struct Stats {
     pub average_fees_per_block_over_last_2016_blocks: FetchStatus<u64>,
     pub fees_as_a_percent_of_reward_for_last_2016_blocks: FetchStatus<f64>,
     pub fees_as_a_percent_of_reward_for_last_24_hours: FetchStatus<f64>,
+    pub segwit_percent_last_24_hours: FetchStatus<f64>,
+    pub segwit_spending_payments_percent_last_24_hours: FetchStatus<f64>,
+    pub segwit_spending_transactions_percent_last_24_hours: FetchStatus<f64>,
 }
 
 #[derive(Clone)]
@@ -82,6 +85,9 @@ impl AppState {
         let average_fees_per_block_over_last_2016_blocks = FetchStatus::NotStarted;
         let fees_as_a_percent_of_reward_for_last_2016_blocks = FetchStatus::NotStarted;
         let fees_as_a_percent_of_reward_for_last_24_hours = FetchStatus::NotStarted;
+        let segwit_percent_last_24_hours = FetchStatus::NotStarted;
+        let segwit_spending_payments_percent_last_24_hours = FetchStatus::NotStarted;
+        let segwit_spending_transactions_percent_last_24_hours = FetchStatus::NotStarted;
 
         Self::Initialized(InitializedData {
             duration,
@@ -112,6 +118,9 @@ impl AppState {
                 average_fees_per_block_over_last_2016_blocks,
                 fees_as_a_percent_of_reward_for_last_2016_blocks,
                 fees_as_a_percent_of_reward_for_last_24_hours,
+                segwit_percent_last_24_hours,
+                segwit_spending_payments_percent_last_24_hours,
+                segwit_spending_transactions_percent_last_24_hours,
             },
             newest_block_found_height: None,
         })
@@ -207,6 +216,9 @@ impl AppState {
                     average_fees_per_block_over_last_2016_blocks,
                     fees_as_a_percent_of_reward_for_last_2016_blocks,
                     fees_as_a_percent_of_reward_for_last_24_hours,
+                    segwit_percent_last_24_hours,
+                    segwit_spending_payments_percent_last_24_hours,
+                    segwit_spending_transactions_percent_last_24_hours,
                     ..
                 },
             ..
@@ -547,6 +559,58 @@ impl AppState {
                     FetchEvent::Complete(new_fees_as_a_percent_of_reward_for_last_24_hours) => {
                         *fees_as_a_percent_of_reward_for_last_24_hours = FetchStatus::Complete(
                             new_fees_as_a_percent_of_reward_for_last_24_hours,
+                        );
+                    }
+                },
+                Resource::SegwitPercentLast24Hours(event) => match event {
+                    FetchEvent::Start => {
+                        *segwit_percent_last_24_hours =
+                            FetchStatus::InProgress(match segwit_percent_last_24_hours {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            })
+                    }
+                    FetchEvent::Complete(new_segwit_percent_last_24_hours) => {
+                        *segwit_percent_last_24_hours =
+                            FetchStatus::Complete(new_segwit_percent_last_24_hours);
+                    }
+                },
+                Resource::SegwitSpendingPaymentsPercentLast24Hours(event) => match event {
+                    FetchEvent::Start => {
+                        *segwit_spending_payments_percent_last_24_hours = FetchStatus::InProgress(
+                            match segwit_spending_payments_percent_last_24_hours {
+                                FetchStatus::Complete(old_value) => Some(*old_value),
+                                FetchStatus::NotStarted => None,
+                                FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                        // InProgress
+                            },
+                        )
+                    }
+                    FetchEvent::Complete(new_segwit_spending_payments_percent_last_24_hours) => {
+                        *segwit_spending_payments_percent_last_24_hours = FetchStatus::Complete(
+                            new_segwit_spending_payments_percent_last_24_hours,
+                        );
+                    }
+                },
+                Resource::SegwitSpendingTransactionsPercentLast24Hours(event) => match event {
+                    FetchEvent::Start => {
+                        *segwit_spending_transactions_percent_last_24_hours =
+                            FetchStatus::InProgress(
+                                match segwit_spending_transactions_percent_last_24_hours {
+                                    FetchStatus::Complete(old_value) => Some(*old_value),
+                                    FetchStatus::NotStarted => None,
+                                    FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                            // InProgress
+                                },
+                            )
+                    }
+                    FetchEvent::Complete(
+                        new_segwit_spending_transactions_percent_last_24_hours,
+                    ) => {
+                        *segwit_spending_transactions_percent_last_24_hours = FetchStatus::Complete(
+                            new_segwit_spending_transactions_percent_last_24_hours,
                         );
                     }
                 },

@@ -30,6 +30,9 @@ pub enum Resource {
     AverageFeesPerBlockOverLast2016Blocks(FetchEvent<u64>),
     FeesAsAPercentOfRewardForLast2016Blocks(FetchEvent<f64>),
     FeesAsAPercentOfRewardForLast24Hours(FetchEvent<f64>),
+    SegwitPercentLast24Hours(FetchEvent<f64>),
+    SegwitSpendingPaymentsPercentLast24Hours(FetchEvent<f64>),
+    SegwitSpendingTransactionsPercentLast24Hours(FetchEvent<f64>),
 }
 
 pub enum InputEvent {

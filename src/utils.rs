@@ -59,6 +59,11 @@ pub fn format_number_string(ss: String) -> String {
     }
 }
 
+pub fn percent_string(num: f64, decimals: u32) -> String {
+    let rounded = round(num * 100.0, decimals);
+    format!("{}%", rounded)
+}
+
 pub fn format_number(num: u64) -> String {
     let num_string = format!("{}", num);
     format_number_string(num_string)
@@ -75,4 +80,19 @@ pub fn round(x: f64, decimals: u32) -> f64 {
 
 pub fn convert_satoshis_to_btc(sats: u64) -> f64 {
     sats as f64 / 100_000_000.0
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // TODO: write tests
+    #[test]
+    fn percent_string_words() {
+        let num = 0.84234;
+        let s = percent_string(num, 2);
+        assert_eq!(s, "84.23%");
+        let s = percent_string(num, 0);
+        assert_eq!(s, "84%");
+    }
 }

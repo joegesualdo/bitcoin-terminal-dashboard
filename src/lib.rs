@@ -417,6 +417,47 @@ fn start_loop_for_fetching_fees_as_a_percent_of_reward_for_last_24_hours(events:
         sleep(Duration::from_secs(5 * 60));
     });
 }
+fn start_loop_for_fetching_segwit_stats_for_last_24_hours(events: &Events) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::SegwitPercentLast24Hours(FetchEvent::Start),
+        ));
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::SegwitSpendingPaymentsPercentLast24Hours(FetchEvent::Start),
+        ));
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::SegwitSpendingTransactionsPercentLast24Hours(FetchEvent::Start),
+        ));
+        // TODO: Show the other segwit stats
+        // We're retrieving a lot of other segwit information.
+        let (
+            percent_of_transactions_with_a_segwit_vout,
+            percent_of_transactions_with_a_segwit_vin_or_vout,
+            percent_based_on_transaction_hexes,
+            percent_of_payments_spending_segwit_per_day,
+            percent_of_segwit_spending_transactions_per_day,
+        ) = bitcoin_node_query::get_percent_of_vouts_used_segwit_over_last_24_hours(&c);
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::SegwitPercentLast24Hours(FetchEvent::Complete(
+                percent_based_on_transaction_hexes,
+            )),
+        ));
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::SegwitSpendingPaymentsPercentLast24Hours(FetchEvent::Complete(
+                percent_of_payments_spending_segwit_per_day,
+            )),
+        ));
+        let _ = tx.clone().send(InputEvent::FetchResource(
+            Resource::SegwitSpendingTransactionsPercentLast24Hours(FetchEvent::Complete(
+                percent_of_segwit_spending_transactions_per_day,
+            )),
+        ));
+        // Every three hours
+        sleep(Duration::from_secs(3 * 60 * 60));
+    });
+}
 
 pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     // Configure Crossterm backend for tui
@@ -454,6 +495,7 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     start_loop_for_fetching_average_fees_per_block_over_last_2016_blocks(&events);
     start_loop_for_fetching_fees_as_a_percent_of_reward_for_last_2016_blocks(&events);
     start_loop_for_fetching_fees_as_a_percent_of_reward_for_last_24_hours(&events);
+    start_loop_for_fetching_segwit_stats_for_last_24_hours(&events);
 
     loop {
         let mut app = app.borrow_mut();
