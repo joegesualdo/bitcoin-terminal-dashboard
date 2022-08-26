@@ -183,7 +183,7 @@ pub fn transactions_data_component<'a>(
                     .stats
                     .segwit_spending_transactions_percent_last_24_hours,
                 |segwit_spending_transactions_percent_last_24_hours: &f64| -> String {
-                    let percent_string = round(
+                    let percent_string = percent_string(
                         segwit_spending_transactions_percent_last_24_hours.clone(),
                         2,
                     );
