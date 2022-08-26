@@ -7,8 +7,6 @@
 
 ![Screenshot](screenshot_3.png)
 
-This library provides helpful functions to query common information about the bitcoin network.
-
 ## Install
 > Add package to Cargo.toml file
 ```shell
