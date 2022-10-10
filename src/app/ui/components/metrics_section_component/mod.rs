@@ -122,6 +122,61 @@ where
     data_spans
 }
 
+pub fn market_cap_component<'a>(initialized_data: &'a InitializedData) -> Vec<Spans> {
+    let format = |price: &f64, total_money_supply: &f64| -> String {
+        let market_cap = price * total_money_supply;
+        // let sats_per_dollar = 1.0 / (price / 100_000_000.0);
+        // let sats_per_dollar = sats_per_dollar;
+        let rounded = round(market_cap, 0);
+        let formatted = format_float_number(rounded);
+        format!("${}", formatted)
+    };
+    let total_money_supply_fetch = &initialized_data.stats.total_money_supply;
+    let bitcoin_price_fetch = &initialized_data.stats.bitcoin_price;
+    let data: String = match bitcoin_price_fetch {
+        FetchStatus::Complete(bitcoin_price_data) => {
+            let data: String = match total_money_supply_fetch {
+                FetchStatus::Complete(total_money_supply_data) => {
+                    format(&bitcoin_price_data, &total_money_supply_data)
+                }
+                FetchStatus::NotStarted => "---".to_string(),
+                FetchStatus::InProgress(maybe_old_value) => match maybe_old_value {
+                    Some(old_value) => {
+                        format!("↻ {}", format(&bitcoin_price_data, &old_value))
+                    }
+                    None => "🔄".to_string(),
+                },
+            };
+            data
+        }
+        FetchStatus::NotStarted => "---".to_string(),
+        FetchStatus::InProgress(maybe_old_value) => match maybe_old_value {
+            Some(old_bitcoin_price_value) => {
+                let data: String = match total_money_supply_fetch {
+                    FetchStatus::Complete(total_money_supply_data) => {
+                        format(&old_bitcoin_price_value, &total_money_supply_data)
+                    }
+                    FetchStatus::NotStarted => "---".to_string(),
+                    FetchStatus::InProgress(maybe_old_value) => match maybe_old_value {
+                        Some(old_total_money_supply_value) => {
+                            format!(
+                                "↻ {}",
+                                format(&old_bitcoin_price_value, &old_total_money_supply_value)
+                            )
+                        }
+                        None => "🔄".to_string(),
+                    },
+                };
+                data
+            }
+            None => "🔄".to_string(),
+        },
+    };
+    let data_text = format!("{}", data);
+    let data_spans = metric_line_component("Market cap", data_text);
+    data_spans
+}
+
 pub fn market_data_component<'a>(
     initialized_data: &'a InitializedData,
 ) -> (Paragraph<'a>, Paragraph<'a>) {
@@ -129,6 +184,7 @@ pub fn market_data_component<'a>(
         vec![
             bitcoin_price_component(initialized_data),
             sats_per_dollar_component(initialized_data),
+            market_cap_component(initialized_data),
         ],
         " Market 📈 ",
     )

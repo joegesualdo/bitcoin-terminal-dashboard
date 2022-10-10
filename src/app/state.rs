@@ -21,6 +21,7 @@ pub struct Stats {
     pub average_block_time_for_last_2016_blocks: FetchStatus<u64>,
     pub chain_size: FetchStatus<u64>,
     pub utxo_set_size: FetchStatus<u64>,
+    pub total_money_supply: FetchStatus<f64>,
     pub total_transactions_count: FetchStatus<u64>,
     pub tps_for_last_30_days: FetchStatus<f64>,
     pub total_fees_for_last_24_hours: FetchStatus<u64>,
@@ -70,6 +71,7 @@ impl AppState {
         let average_block_time_for_last_2016_blocks = FetchStatus::NotStarted;
         let chain_size = FetchStatus::NotStarted;
         let utxo_set_size = FetchStatus::NotStarted;
+        let total_money_supply = FetchStatus::NotStarted;
         let total_transactions_count = FetchStatus::NotStarted;
         let tps_for_last_30_days = FetchStatus::NotStarted;
         let total_fees_for_last_24_hours = FetchStatus::NotStarted;
@@ -102,6 +104,7 @@ impl AppState {
                 seconds_since_last_block,
                 transactions_count_over_last_30_days,
                 average_block_time_for_last_2016_blocks,
+                total_money_supply,
                 utxo_set_size,
                 total_transactions_count,
                 tps_for_last_30_days,
@@ -201,6 +204,7 @@ impl AppState {
                     average_block_time_for_last_2016_blocks,
                     chain_size,
                     utxo_set_size,
+                    total_money_supply,
                     total_transactions_count,
                     tps_for_last_30_days,
                     total_fees_for_last_24_hours,
@@ -320,6 +324,19 @@ impl AppState {
                     }
                     FetchEvent::Complete(new_utxo_set_size) => {
                         *utxo_set_size = FetchStatus::Complete(new_utxo_set_size);
+                    }
+                },
+                Resource::TotalMoneySupply(event) => match event {
+                    FetchEvent::Start => {
+                        *total_money_supply = FetchStatus::InProgress(match total_money_supply {
+                            FetchStatus::Complete(old_value) => Some(*old_value),
+                            FetchStatus::NotStarted => None,
+                            FetchStatus::InProgress(_) => panic!(), // We should never go from InProgress to
+                                                                    // InProgress
+                        })
+                    }
+                    FetchEvent::Complete(new_total_money_supply) => {
+                        *total_money_supply = FetchStatus::Complete(new_total_money_supply);
                     }
                 },
                 Resource::TotalTransactionCount(event) => match event {

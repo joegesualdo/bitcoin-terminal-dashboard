@@ -12,7 +12,7 @@ chrono = "0.4"
 bitcoin-price = "0.1.2"
 
 log = "0.4"
-bitcoin-node-query = "=0.1.7"
+bitcoin-node-query = "=0.1.9"
 jsonrpc = "0.13.0"
 time = { version = "0.2", default-features = false }
 

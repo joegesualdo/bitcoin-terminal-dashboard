@@ -143,10 +143,14 @@ fn start_loop_for_fetching_chain_size(events: &Events) {
         sleep(Duration::from_secs(5 * 60));
     });
 }
-fn start_loop_for_fetching_utxo_set_size(events: &Events) {
+// TODO: This takes a very long time and blocks other rpc command from being run.
+fn start_loop_for_fetching_utxo_set_size(events: &Events, sleep_duration_seconds: u64) {
     let tx = events.tx.clone();
     let c = get_client();
     thread::spawn(move || loop {
+        // TODO: Since the call takes forever and blocks other commands, we'll wait a little bit of
+        // time before we call it so the initial values of other metics can load
+        sleep(Duration::from_secs(sleep_duration_seconds));
         let _ = tx
             .clone()
             .send(InputEvent::FetchResource(Resource::UtxoSetSize(
@@ -158,7 +162,29 @@ fn start_loop_for_fetching_utxo_set_size(events: &Events) {
             .send(InputEvent::FetchResource(Resource::UtxoSetSize(
                 FetchEvent::Complete(utxo_set_size),
             )));
-        sleep(Duration::from_secs(5 * 60));
+        sleep(Duration::from_secs(20 * 60));
+    });
+}
+// TODO: This takes a very long time and blocks other rpc command from being run.
+fn start_loop_for_fetching_total_money_supply(events: &Events, sleep_duration_seconds: u64) {
+    let tx = events.tx.clone();
+    let c = get_client();
+    thread::spawn(move || loop {
+        // TODO: Since the call takes forever and blocks other commands, we'll wait a little bit of
+        // time before we call it so the initial values of other metics can load
+        sleep(Duration::from_secs(sleep_duration_seconds));
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::TotalMoneySupply(
+                FetchEvent::Start,
+            )));
+        let total_money_supply = bitcoin_node_query::get_total_money_supply(&c);
+        let _ = tx
+            .clone()
+            .send(InputEvent::FetchResource(Resource::TotalMoneySupply(
+                FetchEvent::Complete(total_money_supply),
+            )));
+        sleep(Duration::from_secs(20 * 60));
     });
 }
 fn start_loop_for_fetching_total_transaction_count(events: &Events) {
@@ -478,8 +504,6 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     start_loop_for_fetching_new_block_height(&events);
     start_loop_for_fetching_average_block_time_for_last_2016_blocks(&events);
     start_loop_for_fetching_chain_size(&events);
-    // TODO: this is erroring out
-    //start_loop_for_fetching_utxo_set_size(&events);
     start_loop_for_fetching_total_transaction_count(&events);
     start_loop_for_fetching_tps_for_last_30_days(&events);
     start_loop_for_fetching_total_fees_for_last_24_hours(&events);
@@ -496,6 +520,8 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     start_loop_for_fetching_fees_as_a_percent_of_reward_for_last_2016_blocks(&events);
     start_loop_for_fetching_fees_as_a_percent_of_reward_for_last_24_hours(&events);
     start_loop_for_fetching_segwit_stats_for_last_24_hours(&events);
+    start_loop_for_fetching_total_money_supply(&events, 5);
+    start_loop_for_fetching_utxo_set_size(&events, 100);
 
     loop {
         let mut app = app.borrow_mut();
