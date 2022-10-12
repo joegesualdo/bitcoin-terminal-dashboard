@@ -60,7 +60,6 @@ where
         .title("Metrics")
         .border_type(BorderType::Rounded);
 
-    //
     let metric_sections_uis = match app.state() {
         AppState::Init => vec![],
         AppState::Initialized(initialized_data) => {
