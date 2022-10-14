@@ -525,10 +525,8 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
 
     loop {
         let mut app = app.borrow_mut();
-
         // Render
         terminal.draw(|rect| ui::draw(rect, &app))?;
-
         // Handle inputs
         let result = match events.next()? {
             InputEvent::Input(key) => app.do_action(key),
