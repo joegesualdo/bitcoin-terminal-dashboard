@@ -9,7 +9,6 @@ use crate::inputs::Resource;
 pub mod actions;
 pub mod state;
 pub mod ui;
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum AppReturn {
     Exit,
